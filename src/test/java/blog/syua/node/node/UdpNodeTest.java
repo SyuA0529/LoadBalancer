@@ -9,6 +9,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import blog.syua.healthcheck.HealthCheckResponse;
 import blog.syua.utils.NodeMessageUtil;
+import nl.altindag.log.LogCaptor;
 
 @DisplayName("UDP 노드 테스트")
 class UdpNodeTest {
@@ -27,6 +29,8 @@ class UdpNodeTest {
 	private static final int TEST_PORT = 10001;
 	private static DatagramSocket nodeServerSocket;
 	private static boolean testing;
+
+	private SoftAssertions softAssertions;
 
 	private UdpNode udpNode;
 
@@ -55,6 +59,7 @@ class UdpNodeTest {
 
 	@BeforeEach
 	void beforeEach() throws IOException {
+		softAssertions = new SoftAssertions();
 		udpNode = new UdpNode(InetAddress.getLoopbackAddress().getHostAddress(), TEST_PORT);
 	}
 
@@ -93,14 +98,14 @@ class UdpNodeTest {
 		@DisplayName("노드에게 받은 데이터를 포워딩할 수 없는 경우 에러 메세지를 반환한다")
 		void returnErrorMessage() throws IOException {
 			//given
-			UdpNode deadUdpNode = new UdpNode(InetAddress.getLocalHost().getHostAddress(), 10);
+			UdpNode deadUdpNode = new UdpNode(InetAddress.getLocalHost().getHostAddress(), 30000);
 			byte[] clientData = "client data".getBytes(StandardCharsets.UTF_8);
 			DatagramPacket clientPacket = new DatagramPacket(clientData, clientData.length,
 				InetAddress.getLoopbackAddress(), TEST_PORT);
 			final DatagramPacket[] resultPacket = new DatagramPacket[1];
 
 			//when
-			deadUdpNode.forwardPacket(new DatagramSocket(6000) {
+			deadUdpNode.forwardPacket(new DatagramSocket(6001) {
 				@Override
 				public void send(DatagramPacket packet) {
 					resultPacket[0] = packet;
@@ -116,17 +121,11 @@ class UdpNodeTest {
 	@Nested
 	@DisplayName("Method: isHealthy")
 	class MethodIsHealthy {
-		private UdpNode targetUdpNode;
-
-		@BeforeEach
-		void beforeEach() throws IOException {
-			targetUdpNode = new UdpNode(InetAddress.getLocalHost().getHostAddress(), 20000);
-		}
-
 		@Test
 		@DisplayName("노드가 살아있는 경우 true를 반환한다")
-		void returnTrue() {
+		void returnTrue() throws IOException {
 			//given
+			UdpNode targetUdpNode = new UdpNode(InetAddress.getLocalHost().getHostAddress(), 20000);
 			Thread nodeThread = getHealthCheckNodeThread(20000, true);
 			nodeThread.start();
 
@@ -137,8 +136,10 @@ class UdpNodeTest {
 
 		@Test
 		@DisplayName("노드가 죽어있는 경우 false를 반환한다")
-		void returnFalse() {
+		void returnFalse() throws IOException {
 			//given
+			UdpNode targetUdpNode = new UdpNode(InetAddress.getLocalHost().getHostAddress(), 0);
+
 			//when
 			//then
 			assertThat(targetUdpNode.isHealthy()).isFalse();
@@ -148,13 +149,17 @@ class UdpNodeTest {
 		@DisplayName("노드가 보낸 응답의 파싱에 실패한 경우 false를 반환한다")
 		void returnFalseWhenParsingFail() throws IOException {
 			//given
-			UdpNode targetUdpNode = new UdpNode(InetAddress.getLocalHost().getHostAddress(), 20000);
+			UdpNode targetUdpNode = new UdpNode(InetAddress.getLocalHost().getHostAddress(), 20001);
 			Thread nodeThread = getHealthCheckNodeThread(20001, false);
 			nodeThread.start();
+			LogCaptor logCaptor = LogCaptor.forClass(UdpNode.class);
 
 			//when
 			//then
-			assertThat(targetUdpNode.isHealthy()).isFalse();
+			softAssertions.assertThat(targetUdpNode.isHealthy()).isFalse();
+			softAssertions.assertThat(logCaptor.getLogs()).anyMatch(log -> log.contains("Json Parsing Error"));
+			softAssertions.assertAll();
+			logCaptor.close();
 			nodeThread.interrupt();
 		}
 

@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 public class TcpNode extends Node {
 
 	@Value("${loadbalancer.tcp.timeout}")
-	private final int tcpTimeOut = Integer.MAX_VALUE;
+	private final int tcpTimeOut = 5000;
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -37,10 +37,8 @@ public class TcpNode extends Node {
 
 	@Override
 	public boolean isHealthy() {
-		try (Socket socket = new Socket()) {
-			socket.setSoTimeout(tcpTimeOut);
-			socket.connect(new InetSocketAddress(getIpAddr(), getPort()));
-			return getHealthCheckResult(socket);
+		try {
+			return getHealthCheckResult();
 		} catch (IOException exception) {
 			log.error("TcpNode: Error occur in Health Check\n{}",
 				Arrays.toString(exception.getStackTrace()));
@@ -51,7 +49,7 @@ public class TcpNode extends Node {
 	public void forwardPacket(Socket clientSocket) {
 		try (InputStream clientInputStream = clientSocket.getInputStream();
 			 OutputStream clientOutputStream = clientSocket.getOutputStream()) {
-			byte[] resultData = forwardDataToNode(clientInputStream.readAllBytes());
+			byte[] resultData = getResultFromNode(clientInputStream.readAllBytes());
 			clientOutputStream.write(resultData);
 			clientOutputStream.flush();
 			clientSocket.close();
@@ -61,14 +59,10 @@ public class TcpNode extends Node {
 		}
 	}
 
-	private boolean getHealthCheckResult(Socket socket) throws IOException {
-		try (InputStream inputStream = socket.getInputStream();
-			 OutputStream outputStream = socket.getOutputStream()) {
-			outputStream.write(objectMapper.writeValueAsBytes(HealthCheckRequest.getInstance()));
-			outputStream.flush();
-
-			byte[] bytes = inputStream.readAllBytes();
-			HealthCheckResponse response = objectMapper.readValue(bytes, HealthCheckResponse.class);
+	private boolean getHealthCheckResult() throws IOException {
+		byte[] resultFromNode = getResultFromNode(objectMapper.writeValueAsBytes(HealthCheckRequest.getInstance()));
+		try {
+			HealthCheckResponse response = objectMapper.readValue(resultFromNode, HealthCheckResponse.class);
 			if (response.getAck().equals(HealthCheckResponse.SUCCESS_ACK)) {
 				return true;
 			}
@@ -79,7 +73,7 @@ public class TcpNode extends Node {
 		return false;
 	}
 
-	private byte[] forwardDataToNode(byte[] forwardData) throws IOException {
+	private byte[] getResultFromNode(byte[] forwardData) throws IOException {
 		try (Socket nodeSocket = new Socket()) {
 			nodeSocket.setSoTimeout(tcpTimeOut);
 			nodeSocket.connect(new InetSocketAddress(getIpAddr(), getPort()));
@@ -88,6 +82,7 @@ public class TcpNode extends Node {
 				 OutputStream nodeOutputStream = nodeSocket.getOutputStream()) {
 				nodeOutputStream.write(forwardData);
 				nodeOutputStream.flush();
+				nodeSocket.shutdownOutput(); // Todo: WHY!!
 				resultData = nodeInputStream.readAllBytes();
 			}
 			return resultData;

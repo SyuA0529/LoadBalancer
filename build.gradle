@@ -20,6 +20,7 @@ repositories {
 
 dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.7.1'
+    testImplementation 'io.github.hakky54:logcaptor:2.9.0'
 
     implementation 'org.springframework.boot:spring-boot-starter'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'

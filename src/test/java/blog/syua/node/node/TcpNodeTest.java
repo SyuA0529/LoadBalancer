@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -13,6 +14,7 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,6 +27,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import blog.syua.healthcheck.HealthCheckResponse;
 import blog.syua.utils.NodeMessageUtil;
+import nl.altindag.log.LogCaptor;
 
 @DisplayName("TCP 노드 테스트")
 class TcpNodeTest {
@@ -34,6 +37,8 @@ class TcpNodeTest {
 
 	private static ServerSocket nodeSocket;
 	private static boolean testing;
+
+	private SoftAssertions softAssertions;
 
 	@Mock
 	private Socket clientSocket;
@@ -49,9 +54,15 @@ class TcpNodeTest {
 			while (testing) {
 				try {
 					Socket socket = nodeSocket.accept();
+					InputStream inputStream = socket.getInputStream();
 					OutputStream outputStream = socket.getOutputStream();
+
+					inputStream.readAllBytes();
 					outputStream.write("Hello".getBytes(StandardCharsets.UTF_8));
+					outputStream.flush();
+
 					outputStream.close();
+					inputStream.close();
 					socket.close();
 				} catch (IOException exception) {
 					if (!exception.getMessage().equals("Interrupted function call: accept failed")) {
@@ -64,6 +75,7 @@ class TcpNodeTest {
 
 	@BeforeEach
 	void beforeEach() throws IOException {
+		softAssertions = new SoftAssertions();
 		tcpNode = new TcpNode(InetAddress.getLoopbackAddress().getHostAddress(), TEST_PORT);
 		clientSocket = mock(Socket.class);
 		when(clientSocket.getInputStream()).thenReturn(new ByteArrayInputStream(clientSocketData));
@@ -140,13 +152,17 @@ class TcpNodeTest {
 		@DisplayName("노드가 보낸 응답의 파싱에 실패한 경우 false를 반환한다")
 		void returnFalseWhenParsingFail() throws IOException {
 			//given
-			TcpNode targetTcpNode = new TcpNode(InetAddress.getLocalHost().getHostAddress(), 20000);
+			TcpNode targetTcpNode = new TcpNode(InetAddress.getLocalHost().getHostAddress(), 20001);
 			Thread nodeThread = getHealthCheckNodeThread(20001, false);
 			nodeThread.start();
+			LogCaptor logCaptor = LogCaptor.forClass(TcpNode.class);
 
 			//when
 			//then
-			assertThat(targetTcpNode.isHealthy()).isFalse();
+			softAssertions.assertThat(targetTcpNode.isHealthy()).isFalse();
+			softAssertions.assertThat(logCaptor.getLogs()).anyMatch(log -> log.contains("Json Parsing Error"));
+			softAssertions.assertAll();
+			logCaptor.close();
 			nodeThread.interrupt();
 		}
 
@@ -156,6 +172,8 @@ class TcpNodeTest {
 					ServerSocket serverSocket = new ServerSocket(port);
 					Socket clientSocket;
 					while (Objects.nonNull(clientSocket = serverSocket.accept())) {
+						InputStream inputStream = clientSocket.getInputStream();
+						// inputStream.readAllBytes();
 						OutputStream outputStream = clientSocket.getOutputStream();
 						if (isCorrect) {
 							HealthCheckResponse response = new HealthCheckResponse();
@@ -165,6 +183,7 @@ class TcpNodeTest {
 							outputStream.write("Wrong".getBytes(StandardCharsets.UTF_8));
 						}
 						outputStream.flush();
+						inputStream.close();
 						outputStream.close();
 						clientSocket.close();
 					}
