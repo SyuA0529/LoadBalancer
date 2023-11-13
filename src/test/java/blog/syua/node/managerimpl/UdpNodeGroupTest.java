@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
 
 import blog.syua.node.nodeimpl.UdpNode;
 
-@DisplayName("UDP Node Manager 테스트")
+@DisplayName("UDP NodeGroup 테스트")
 class UdpNodeGroupTest {
 
 	private static final int TEST_PORT = 10003;
