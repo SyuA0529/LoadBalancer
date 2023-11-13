@@ -1,4 +1,4 @@
-package blog.syua.node.managerimpl;
+package blog.syua.node.group;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -15,7 +15,9 @@ import org.springframework.beans.factory.annotation.Value;
 
 import blog.syua.node.Node;
 import blog.syua.node.NodeGroup;
+import blog.syua.node.Protocol;
 import blog.syua.node.nodeimpl.UdpNode;
+import blog.syua.utils.NodeMessageUtil;
 import blog.syua.utils.ThreadPoolUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -57,10 +59,9 @@ public class UdpNodeGroup implements NodeGroup {
 					threadPool.execute(() -> selectNode().forwardPacket(listenSocket, forwardClientPacket));
 				}
 			} catch (SocketTimeoutException timeoutException) {
-				log.info("UdpNodeManager: Socket Time Out\n{} {}", clientPacket.getAddress(), clientPacket.getPort());
-			} catch (IOException e) {
-				log.error("UdpNodeManager: Error occur in startForward\n{}", Arrays.toString(e.getStackTrace()));
-				throw new IllegalThreadStateException("패킷을 받을 수 없습니다");
+				log.info("UdpNodeGroup: Socket Time Out - {Ip: {}, Port: {}}", clientPacket.getAddress(), clientPacket.getPort());
+			} catch (IOException exception) {
+				checkSocketException(exception);
 			}
 		}).start();
 	}
@@ -71,7 +72,7 @@ public class UdpNodeGroup implements NodeGroup {
 			throw new IllegalArgumentException("UDP 노드가 아닙니다");
 		}
 		udpNodes.offer((UdpNode)udpNode);
-		log.info("UdpNodeManager: registerNode {}", udpNode);
+		log.info("UdpNodeGroup: registerNode - {}", udpNode);
 	}
 
 	@Override
@@ -84,7 +85,22 @@ public class UdpNodeGroup implements NodeGroup {
 			isAvailable = false;
 			ThreadPoolUtils.removeThreadPool(threadPool, listenSocket);
 		}
-		log.info("UdpNodeManager: unregisterNode {}", udpNode);
+		log.info("UdpNodeGroup: unregisterNode - {}", udpNode);
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return udpNodes.isEmpty();
+	}
+
+	private void checkSocketException(IOException exception) {
+		if (exception instanceof SocketException &&
+			exception.getMessage().equals(NodeMessageUtil.getSocketInterruptMessage(Protocol.UDP))) {
+			log.info("UdpNodeGroup: Stop Forward - {}", this);
+			return;
+		}
+		log.error("UdpNodeGroup: Error occur in startForward\n{}", Arrays.toString(exception.getStackTrace()));
+		throw new IllegalThreadStateException("패킷을 받을 수 없습니다" + exception.getMessage());
 	}
 
 	private synchronized UdpNode selectNode() {

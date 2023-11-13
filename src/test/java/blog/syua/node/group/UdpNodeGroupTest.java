@@ -1,4 +1,4 @@
-package blog.syua.node.managerimpl;
+package blog.syua.node.group;
 
 import static org.assertj.core.api.Assertions.*;
 

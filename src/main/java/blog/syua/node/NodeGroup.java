@@ -2,8 +2,8 @@ package blog.syua.node;
 
 import java.io.IOException;
 
-import blog.syua.node.managerimpl.TcpNodeGroup;
-import blog.syua.node.managerimpl.UdpNodeGroup;
+import blog.syua.node.group.TcpNodeGroup;
+import blog.syua.node.group.UdpNodeGroup;
 
 public interface NodeGroup {
 
@@ -22,5 +22,7 @@ public interface NodeGroup {
 	void registerNode(Node tcpNode);
 
 	void unRegisterNode(Node tcpNode);
+
+	boolean isEmpty();
 
 }

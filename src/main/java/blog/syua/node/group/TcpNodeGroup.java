@@ -1,8 +1,9 @@
-package blog.syua.node.managerimpl;
+package blog.syua.node.group;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Objects;
@@ -12,7 +13,9 @@ import java.util.concurrent.Executors;
 
 import blog.syua.node.Node;
 import blog.syua.node.NodeGroup;
+import blog.syua.node.Protocol;
 import blog.syua.node.nodeimpl.TcpNode;
+import blog.syua.utils.NodeMessageUtil;
 import blog.syua.utils.ThreadPoolUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -41,21 +44,21 @@ public class TcpNodeGroup implements NodeGroup {
 		}
 		isAvailable = true;
 		new Thread(() -> {
-			log.info("TcpNodeManager: startForward {}", this);
+			log.info("TcpNodeGroup: StartForward - {}", this);
 			Socket clientSocket;
 			try {
 				while (isAvailable && Objects.nonNull(clientSocket = listenSocket.accept())) {
-					log.info("TcpNodeManager: connect new client {} {}", clientSocket.getInetAddress(),
+					log.info("TcpNodeGroup: Connect new client - {} {}", clientSocket.getInetAddress(),
 						clientSocket.getPort());
 					Socket finalClientSocket = clientSocket;
 					threadPool.execute(() -> selectNode().forwardPacket(finalClientSocket));
 				}
-			} catch (IOException e) {
-				log.error("UdpNodeManager: Error occur in startForward\n{}", Arrays.toString(e.getStackTrace()));
-				throw new IllegalThreadStateException("패킷을 받을 수 없습니다");
+			} catch (IOException exception) {
+				checkSocketException(exception);
 			}
 
 		}).start();
+
 	}
 
 	@Override
@@ -64,7 +67,7 @@ public class TcpNodeGroup implements NodeGroup {
 			throw new IllegalArgumentException("TCP 노드가 아닙니다");
 		}
 		tcpNodes.offer((TcpNode)tcpNode);
-		log.info("TcpNodeManager: registerNode {}", tcpNode);
+		log.info("TcpNodeGroup: RegisterNode - {}", tcpNode);
 	}
 
 	@Override
@@ -73,11 +76,26 @@ public class TcpNodeGroup implements NodeGroup {
 			throw new IllegalArgumentException("TCP 노드가 아닙니다");
 		}
 		tcpNodes.remove(tcpNode);
-		log.info("TcpNodeManager: unregisterNode {}", tcpNode);
+		log.info("TcpNodeGroup: UnregisterNode - {}", tcpNode);
 		if (tcpNodes.isEmpty()) {
 			isAvailable = false;
 			ThreadPoolUtils.removeThreadPool(threadPool, listenSocket);
 		}
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return tcpNodes.isEmpty();
+	}
+
+	private void checkSocketException(IOException exception) {
+		if (exception instanceof SocketException &&
+			exception.getMessage().equals(NodeMessageUtil.getSocketInterruptMessage(Protocol.TCP))) {
+			log.info("TcpNodeGroup: Stop Forward - {}", this);
+			return;
+		}
+		log.error("TcpNodeGroup: Error occur in startForward\n{}", Arrays.toString(exception.getStackTrace()));
+		throw new IllegalThreadStateException("패킷을 받을 수 없습니다 " + exception.getMessage());
 	}
 
 	private synchronized TcpNode selectNode() {
