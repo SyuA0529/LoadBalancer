@@ -5,9 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.ExecutorService;
@@ -25,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 public class UdpNodeGroup implements NodeGroup {
 
 	@Value("${loadbalancer.udp.timeout}")
-	public final int TIME_OUT = 3000;
+	public final int timeOut = 3000;
 	private final Queue<UdpNode> udpNodes;
 	private final ExecutorService threadPool;
 	private final DatagramSocket listenSocket;
@@ -34,7 +32,7 @@ public class UdpNodeGroup implements NodeGroup {
 	public UdpNodeGroup(int port) throws SocketException {
 		udpNodes = new LinkedList<>();
 		listenSocket = new DatagramSocket(port);
-		listenSocket.setSoTimeout(TIME_OUT);
+		listenSocket.setSoTimeout(timeOut);
 		isAvailable = false;
 		threadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 	}
@@ -65,11 +63,6 @@ public class UdpNodeGroup implements NodeGroup {
 				throw new IllegalThreadStateException("패킷을 받을 수 없습니다");
 			}
 		}).start();
-	}
-
-	@Override
-	public Collection<Node> getNodes() {
-		return new ArrayList<>(udpNodes);
 	}
 
 	@Override

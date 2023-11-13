@@ -61,11 +61,6 @@ public class TcpNodeGroup implements NodeGroup {
 	}
 
 	@Override
-	public Collection<Node> getNodes() {
-		return new ArrayList<>(tcpNodes);
-	}
-
-	@Override
 	public synchronized void registerNode(Node tcpNode) {
 		if (!(tcpNode instanceof TcpNode)) {
 			throw new IllegalArgumentException("TCP 노드가 아닙니다");

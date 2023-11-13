@@ -1,7 +1,6 @@
 package blog.syua.node;
 
 import java.io.IOException;
-import java.util.Collection;
 
 import blog.syua.node.managerimpl.TcpNodeGroup;
 import blog.syua.node.managerimpl.UdpNodeGroup;
@@ -19,8 +18,6 @@ public interface NodeGroup {
 	}
 
 	void startForwarding() throws IOException;
-
-	Collection<Node> getNodes();
 
 	void registerNode(Node tcpNode);
 
