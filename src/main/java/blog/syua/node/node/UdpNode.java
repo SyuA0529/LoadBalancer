@@ -5,6 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.Arrays;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Value;
 
@@ -118,13 +119,20 @@ public class UdpNode extends Node {
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		return super.equals(o);
+	public boolean equals(Object object) {
+		if (this == object)
+			return true;
+		if (object == null || getClass() != object.getClass())
+			return false;
+		if (!super.equals(object))
+			return false;
+		UdpNode udpNode = (UdpNode)object;
+		return Objects.equals(getProtocol(), udpNode.getProtocol());
 	}
 
 	@Override
 	public int hashCode() {
-		return super.hashCode();
+		return Objects.hash(super.hashCode(), getProtocol());
 	}
 
 }

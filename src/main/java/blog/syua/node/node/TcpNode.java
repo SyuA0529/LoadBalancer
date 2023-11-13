@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Arrays;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Value;
 
@@ -110,13 +111,20 @@ public class TcpNode extends Node {
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		return super.equals(o);
+	public boolean equals(Object object) {
+		if (this == object)
+			return true;
+		if (object == null || getClass() != object.getClass())
+			return false;
+		if (!super.equals(object))
+			return false;
+		TcpNode tcpNode = (TcpNode)object;
+		return Objects.equals(getProtocol(), tcpNode.getProtocol());
 	}
 
 	@Override
 	public int hashCode() {
-		return super.hashCode();
+		return Objects.hash(super.hashCode(), getPort());
 	}
 
 }
