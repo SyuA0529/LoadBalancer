@@ -2,7 +2,7 @@ package blog.syua.utils;
 
 import java.nio.charset.StandardCharsets;
 
-import blog.syua.node.Protocol;
+import blog.syua.node.node.Protocol;
 
 public class NodeMessageUtil {
 

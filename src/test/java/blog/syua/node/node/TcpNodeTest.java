@@ -1,4 +1,4 @@
-package blog.syua.node.nodeimpl;
+package blog.syua.node.node;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;

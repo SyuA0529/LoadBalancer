@@ -11,10 +11,9 @@ import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import blog.syua.node.Node;
-import blog.syua.node.NodeGroup;
-import blog.syua.node.Protocol;
-import blog.syua.node.nodeimpl.TcpNode;
+import blog.syua.node.node.Node;
+import blog.syua.node.node.Protocol;
+import blog.syua.node.node.TcpNode;
 import blog.syua.utils.NodeMessageUtil;
 import blog.syua.utils.ThreadPoolUtils;
 import lombok.extern.slf4j.Slf4j;

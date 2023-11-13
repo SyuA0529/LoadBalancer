@@ -1,9 +1,9 @@
-package blog.syua.node;
+package blog.syua.node.group;
 
 import java.io.IOException;
 
-import blog.syua.node.group.TcpNodeGroup;
-import blog.syua.node.group.UdpNodeGroup;
+import blog.syua.node.node.Protocol;
+import blog.syua.node.node.Node;
 
 public interface NodeGroup {
 

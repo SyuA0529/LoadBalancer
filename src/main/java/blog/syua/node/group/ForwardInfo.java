@@ -1,7 +1,7 @@
-package blog.syua.forward;
+package blog.syua.node.group;
 
-import blog.syua.node.Node;
-import blog.syua.node.Protocol;
+import blog.syua.node.node.Node;
+import blog.syua.node.node.Protocol;
 import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode

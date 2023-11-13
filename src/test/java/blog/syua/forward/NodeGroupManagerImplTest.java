@@ -15,12 +15,15 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import blog.syua.node.NodeGroup;
-import blog.syua.node.Protocol;
+import blog.syua.node.group.ForwardInfo;
+import blog.syua.node.group.NodeGroup;
+import blog.syua.node.node.Protocol;
+import blog.syua.node.groupmanager.NodeGroupManager;
+import blog.syua.node.groupmanager.NodeGroupManagerImpl;
 import blog.syua.node.group.TcpNodeGroup;
 import blog.syua.node.group.UdpNodeGroup;
-import blog.syua.node.nodeimpl.TcpNode;
-import blog.syua.node.nodeimpl.UdpNode;
+import blog.syua.node.node.TcpNode;
+import blog.syua.node.node.UdpNode;
 
 @SuppressWarnings("unchecked")
 @DisplayName("NodeGroup Manager 테스트")

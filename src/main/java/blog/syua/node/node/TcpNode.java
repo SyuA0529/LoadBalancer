@@ -1,4 +1,4 @@
-package blog.syua.node.nodeimpl;
+package blog.syua.node.node;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,11 +13,9 @@ import org.springframework.beans.factory.annotation.Value;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import blog.syua.forward.ForwardInfo;
+import blog.syua.node.group.ForwardInfo;
 import blog.syua.healthcheck.HealthCheckRequest;
 import blog.syua.healthcheck.HealthCheckResponse;
-import blog.syua.node.Node;
-import blog.syua.node.Protocol;
 import blog.syua.utils.NodeMessageUtil;
 import lombok.extern.slf4j.Slf4j;
 

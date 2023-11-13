@@ -16,7 +16,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import blog.syua.node.nodeimpl.TcpNode;
+import blog.syua.node.node.TcpNode;
 
 @DisplayName("TCP NodeGroup 테스트")
 class TcpNodeGroupTest {

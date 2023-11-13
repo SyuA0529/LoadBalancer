@@ -1,11 +1,9 @@
-package blog.syua.node;
+package blog.syua.node.node;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import blog.syua.forward.ForwardInfo;
-import blog.syua.node.nodeimpl.TcpNode;
-import blog.syua.node.nodeimpl.UdpNode;
+import blog.syua.node.group.ForwardInfo;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 

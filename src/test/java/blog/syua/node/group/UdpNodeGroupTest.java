@@ -17,7 +17,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import blog.syua.node.nodeimpl.UdpNode;
+import blog.syua.node.node.UdpNode;
 
 @DisplayName("UDP NodeGroup 테스트")
 class UdpNodeGroupTest {
