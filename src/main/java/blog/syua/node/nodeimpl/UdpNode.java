@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import blog.syua.forward.ForwardInfo;
 import blog.syua.healthcheck.HealthCheckRequest;
 import blog.syua.healthcheck.HealthCheckResponse;
 import blog.syua.node.Node;
@@ -60,6 +61,11 @@ public class UdpNode extends Node {
 				Arrays.toString(exception.getStackTrace()));
 		}
 		return false;
+	}
+
+	@Override
+	public ForwardInfo getForwardInfo() {
+		return new ForwardInfo(Protocol.UDP, getPort());
 	}
 
 	private boolean getHealthCheckResponse(DatagramSocket socket) throws IOException {

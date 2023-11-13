@@ -3,6 +3,7 @@ package blog.syua.node;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import blog.syua.forward.ForwardInfo;
 import blog.syua.node.nodeimpl.TcpNode;
 import blog.syua.node.nodeimpl.UdpNode;
 
@@ -37,5 +38,7 @@ public abstract class Node {
 	}
 
 	public abstract boolean isHealthy();
+
+	public abstract ForwardInfo getForwardInfo();
 
 }
