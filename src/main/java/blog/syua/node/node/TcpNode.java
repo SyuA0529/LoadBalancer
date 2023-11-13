@@ -82,7 +82,7 @@ public class TcpNode extends Node {
 				 OutputStream nodeOutputStream = nodeSocket.getOutputStream()) {
 				nodeOutputStream.write(forwardData);
 				nodeOutputStream.flush();
-				nodeSocket.shutdownOutput(); // Todo: WHY!!
+				nodeSocket.shutdownOutput(); // have to study
 				resultData = nodeInputStream.readAllBytes();
 			}
 			return resultData;
