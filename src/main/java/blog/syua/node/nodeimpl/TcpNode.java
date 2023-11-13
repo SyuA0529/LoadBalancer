@@ -53,7 +53,7 @@ public class TcpNode extends Node {
 
 	@Override
 	public ForwardInfo getForwardInfo() {
-		return new ForwardInfo(Protocol.TCP, getPort());
+		return ForwardInfo.of(Protocol.TCP, getPort());
 	}
 
 	private boolean getHealthCheckResult(Socket socket) throws IOException {
@@ -68,7 +68,7 @@ public class TcpNode extends Node {
 				return true;
 			}
 		} catch (JsonParseException jsonParseException) {
-			log.info("TcpNode: Json Parsing Error in Health Check\nNode Info: {} {} {}",
+			log.info("TcpNode: Json Parsing Error in Health Check - Node Info: {} {} {}",
 				getProtocol(), getIpAddr(), getPort());
 		}
 		return false;
@@ -82,7 +82,7 @@ public class TcpNode extends Node {
 			clientOutputStream.flush();
 			clientSocket.close();
 		} catch (IOException e) {
-			log.info("TcpNode: fail to forward packet\n{}", Arrays.toString(e.getStackTrace()));
+			log.info("TcpNode: Fail to forward packet\n{}", Arrays.toString(e.getStackTrace()));
 			sendErrorMessage(clientSocket);
 		}
 	}

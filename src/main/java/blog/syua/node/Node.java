@@ -6,9 +6,11 @@ import java.net.UnknownHostException;
 import blog.syua.forward.ForwardInfo;
 import blog.syua.node.nodeimpl.TcpNode;
 import blog.syua.node.nodeimpl.UdpNode;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 @Getter
+@EqualsAndHashCode
 public abstract class Node {
 
 	private final InetAddress ipAddr;

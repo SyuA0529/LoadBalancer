@@ -68,7 +68,7 @@ public class UdpNode extends Node {
 
 	@Override
 	public ForwardInfo getForwardInfo() {
-		return new ForwardInfo(Protocol.UDP, getPort());
+		return ForwardInfo.of(Protocol.UDP, getPort());
 	}
 
 	private boolean getHealthCheckResponse(DatagramSocket socket) throws IOException {
@@ -82,7 +82,7 @@ public class UdpNode extends Node {
 				return true;
 			}
 		} catch (JsonParseException jsonParseException) {
-			log.info("TcpNode: Json Parsing Error in Health Check\nNode Info: {} {} {}",
+			log.info("TcpNode: Json Parsing Error in Health Check - Node Info: {} {} {}",
 				getProtocol(), getIpAddr(), getPort());
 		}
 		return false;
