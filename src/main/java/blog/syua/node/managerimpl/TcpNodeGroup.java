@@ -16,11 +16,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import blog.syua.node.Node;
-import blog.syua.node.NodeGroupManager;
+import blog.syua.node.NodeGroup;
 import blog.syua.node.nodeimpl.TcpNode;
 import blog.syua.utils.ThreadPoolUtils;
 
-public class TcpNodeGroupManager implements NodeGroupManager {
+public class TcpNodeGroup implements NodeGroup {
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -29,7 +29,7 @@ public class TcpNodeGroupManager implements NodeGroupManager {
 	private final ServerSocket listenSocket;
 	private boolean isAvailable;
 
-	public TcpNodeGroupManager(int port) throws IOException {
+	public TcpNodeGroup(int port) throws IOException {
 		tcpNodes = new LinkedList<>();
 		listenSocket = new ServerSocket(port);
 		isAvailable = false;

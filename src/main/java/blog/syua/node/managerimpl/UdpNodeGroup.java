@@ -17,11 +17,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import blog.syua.node.Node;
-import blog.syua.node.NodeGroupManager;
+import blog.syua.node.NodeGroup;
 import blog.syua.node.nodeimpl.UdpNode;
 import blog.syua.utils.ThreadPoolUtils;
 
-public class UdpNodeGroupManager implements NodeGroupManager {
+public class UdpNodeGroup implements NodeGroup {
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -30,7 +30,7 @@ public class UdpNodeGroupManager implements NodeGroupManager {
 	private final DatagramSocket listenSocket;
 	private boolean isAvailable;
 
-	public UdpNodeGroupManager(int port) throws SocketException {
+	public UdpNodeGroup(int port) throws SocketException {
 		udpNodes = new LinkedList<>();
 		listenSocket = new DatagramSocket(port);
 		listenSocket.setSoTimeout(UdpNode.TIME_OUT);

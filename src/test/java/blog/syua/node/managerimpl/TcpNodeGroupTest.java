@@ -19,15 +19,15 @@ import org.junit.jupiter.api.Test;
 import blog.syua.node.nodeimpl.TcpNode;
 
 @DisplayName("TCP Node Manager 테스트")
-class TcpNodeGroupManagerTest {
+class TcpNodeGroupTest {
 
 	private static final int TEST_PORT = 10002;
 
-	private TcpNodeGroupManager tcpNodeManager;
+	private TcpNodeGroup tcpNodeManager;
 
 	@BeforeEach
 	void beforeEach() throws IOException {
-		tcpNodeManager = new TcpNodeGroupManager(TEST_PORT);
+		tcpNodeManager = new TcpNodeGroup(TEST_PORT);
 	}
 
 	@Nested
@@ -92,7 +92,7 @@ class TcpNodeGroupManagerTest {
 			tcpNodeManager.unRegisterNode(tcpNode);
 
 		    //then
-			assertThatThrownBy(TcpNodeGroupManagerTest.this::sendDataToNodeManager)
+			assertThatThrownBy(TcpNodeGroupTest.this::sendDataToNodeManager)
 				.isInstanceOf(ConnectException.class)
 				.hasMessage("Connection refused: connect");
 		}
