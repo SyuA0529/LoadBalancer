@@ -15,18 +15,20 @@ public class ThreadPoolUtils {
 
 	@SuppressWarnings("ResultOfMethodCallIgnored")
 	public static void removeThreadPool(ExecutorService threadPool, Closeable closeable) {
-		log.info("ThreadPoolUtils: removeThreadPool");
+		log.info("ThreadPoolUtils: Start Remove ThreadPool - {}", closeable);
 		threadPool.shutdown();
 		new Thread(() -> {
 			try {
 				threadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
 				closeable.close();
+				log.info("ThreadPoolUtils: Success Remove ThreadPool - {}", closeable);
 			} catch (Exception exception) {
 				threadPool.shutdownNow();
-				log.error("UdpNodeManager: Error occur in unregisterNode\n{}",
+				log.error("ThreadPoolUtils: Error occur in Unregister Node\n{}",
 					Arrays.toString(exception.getStackTrace()));
 				Thread.currentThread().interrupt();
 			}
+			log.info("ThreadPoolUtils: Finish Remove ThreadPool - {}", closeable);
 		}).start();
 	}
 
