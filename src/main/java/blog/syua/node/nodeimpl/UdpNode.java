@@ -7,8 +7,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,12 +18,16 @@ import blog.syua.healthcheck.HealthCheckResponse;
 import blog.syua.node.Node;
 import blog.syua.node.Protocol;
 import blog.syua.utils.NodeMessageUtil;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class UdpNode extends Node {
 
-	private static final Logger logger = LoggerFactory.getLogger(UdpNode.class);
-	public static final int TIME_OUT = 3000;
-	private static final int HEALTH_CHECK_TIME_OUT = 5000;
+	@Value("${loadbalancer.udp.timeout}")
+	public final int TIME_OUT = 3000;
+
+	@Value("${loadbalancer.healthcheck.timeout}")
+	private final int HEALTH_CHECK_TIME_OUT = 5000;
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -46,7 +49,7 @@ public class UdpNode extends Node {
 			sendData(loadBalancerSocket, clientPacket.getAddress(), clientPacket.getPort(),
 				removeTrailingZeros(resultPacket.getData()));
 		} catch (IOException exception) {
-			logger.info(Arrays.toString(exception.getStackTrace()));
+			log.info(Arrays.toString(exception.getStackTrace()));
 			sendErrorMessage(loadBalancerSocket);
 		}
 	}
@@ -57,7 +60,7 @@ public class UdpNode extends Node {
 			socket.setSoTimeout(HEALTH_CHECK_TIME_OUT);
 			return getHealthCheckResponse(socket);
 		} catch (IOException exception) {
-			logger.error("UdpNode: Error occur in Health Check\n{}",
+			log.error("UdpNode: Error occur in Health Check\n{}",
 				Arrays.toString(exception.getStackTrace()));
 		}
 		return false;
@@ -79,7 +82,7 @@ public class UdpNode extends Node {
 				return true;
 			}
 		} catch (JsonParseException jsonParseException) {
-			logger.info("TcpNode: Json Parsing Error in Health Check\nNode Info: {} {} {}",
+			log.info("TcpNode: Json Parsing Error in Health Check\nNode Info: {} {} {}",
 				getProtocol(), getIpAddr(), getPort());
 		}
 		return false;
@@ -103,7 +106,7 @@ public class UdpNode extends Node {
 			DatagramPacket errorPacket = new DatagramPacket(errorMessage, errorMessage.length);
 			loadBalancerSocket.send(errorPacket);
 		} catch (IOException exception) {
-			logger.error("TcpNode: Error Occur in sendErrorMessage\n{}", Arrays.toString(exception.getStackTrace()));
+			log.error("TcpNode: Error Occur in sendErrorMessage\n{}", Arrays.toString(exception.getStackTrace()));
 		}
 	}
 

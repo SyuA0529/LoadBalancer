@@ -13,18 +13,19 @@ import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import blog.syua.node.Node;
 import blog.syua.node.NodeGroup;
 import blog.syua.node.nodeimpl.UdpNode;
 import blog.syua.utils.ThreadPoolUtils;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class UdpNodeGroup implements NodeGroup {
 
-	private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
+	@Value("${loadbalancer.udp.timeout}")
+	public final int TIME_OUT = 3000;
 	private final Queue<UdpNode> udpNodes;
 	private final ExecutorService threadPool;
 	private final DatagramSocket listenSocket;
@@ -33,7 +34,7 @@ public class UdpNodeGroup implements NodeGroup {
 	public UdpNodeGroup(int port) throws SocketException {
 		udpNodes = new LinkedList<>();
 		listenSocket = new DatagramSocket(port);
-		listenSocket.setSoTimeout(UdpNode.TIME_OUT);
+		listenSocket.setSoTimeout(TIME_OUT);
 		isAvailable = false;
 		threadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 	}
@@ -58,9 +59,9 @@ public class UdpNodeGroup implements NodeGroup {
 					threadPool.execute(() -> selectNode().forwardPacket(listenSocket, forwardClientPacket));
 				}
 			} catch (SocketTimeoutException timeoutException) {
-				logger.info("UdpNodeManager: Socket Time Out\n{} {}", clientPacket.getAddress(), clientPacket.getPort());
+				log.info("UdpNodeManager: Socket Time Out\n{} {}", clientPacket.getAddress(), clientPacket.getPort());
 			} catch (IOException e) {
-				logger.error("UdpNodeManager: Error occur in startForward\n{}", Arrays.toString(e.getStackTrace()));
+				log.error("UdpNodeManager: Error occur in startForward\n{}", Arrays.toString(e.getStackTrace()));
 				throw new IllegalThreadStateException("패킷을 받을 수 없습니다");
 			}
 		}).start();
@@ -77,7 +78,7 @@ public class UdpNodeGroup implements NodeGroup {
 			throw new IllegalArgumentException("UDP 노드가 아닙니다");
 		}
 		udpNodes.offer((UdpNode)udpNode);
-		logger.info("UdpNodeManager: registerNode {}", udpNode);
+		log.info("UdpNodeManager: registerNode {}", udpNode);
 	}
 
 	@Override
@@ -90,7 +91,7 @@ public class UdpNodeGroup implements NodeGroup {
 			isAvailable = false;
 			ThreadPoolUtils.removeThreadPool(threadPool, listenSocket);
 		}
-		logger.info("UdpNodeManager: unregisterNode {}", udpNode);
+		log.info("UdpNodeManager: unregisterNode {}", udpNode);
 	}
 
 	private synchronized UdpNode selectNode() {

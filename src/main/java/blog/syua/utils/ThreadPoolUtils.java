@@ -5,18 +5,17 @@ import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class ThreadPoolUtils {
-
-	private static final Logger logger = LoggerFactory.getLogger(ThreadPoolUtils.class);
 
 	private ThreadPoolUtils() {
 	}
 
+	@SuppressWarnings("ResultOfMethodCallIgnored")
 	public static void removeThreadPool(ExecutorService threadPool, Closeable closeable) {
-		logger.info("ThreadPoolUtils: removeThreadPool");
+		log.info("ThreadPoolUtils: removeThreadPool");
 		threadPool.shutdown();
 		new Thread(() -> {
 			try {
@@ -24,7 +23,7 @@ public class ThreadPoolUtils {
 				closeable.close();
 			} catch (Exception exception) {
 				threadPool.shutdownNow();
-				logger.error("UdpNodeManager: Error occur in unregisterNode\n{}",
+				log.error("UdpNodeManager: Error occur in unregisterNode\n{}",
 					Arrays.toString(exception.getStackTrace()));
 				Thread.currentThread().interrupt();
 			}

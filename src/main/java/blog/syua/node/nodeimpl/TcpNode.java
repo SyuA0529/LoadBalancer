@@ -8,8 +8,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,11 +19,13 @@ import blog.syua.healthcheck.HealthCheckResponse;
 import blog.syua.node.Node;
 import blog.syua.node.Protocol;
 import blog.syua.utils.NodeMessageUtil;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class TcpNode extends Node {
 
-	private static final Logger logger = LoggerFactory.getLogger(TcpNode.class);
-	private static final int HEALTH_CHECK_TIME_OUT = Integer.MAX_VALUE;
+	@Value("${loadbalancer.healthcheck.timeout}")
+	private final int HEALTH_CHECK_TIME_OUT = Integer.MAX_VALUE;
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -44,7 +45,7 @@ public class TcpNode extends Node {
 			socket.connect(new InetSocketAddress(getIpAddr(), getPort()));
 			return getHealthCheckResult(socket);
 		} catch (IOException exception) {
-			logger.error("TcpNode: Error occur in Health Check\n{}",
+			log.error("TcpNode: Error occur in Health Check\n{}",
 				Arrays.toString(exception.getStackTrace()));
 		}
 		return false;
@@ -67,7 +68,7 @@ public class TcpNode extends Node {
 				return true;
 			}
 		} catch (JsonParseException jsonParseException) {
-			logger.info("TcpNode: Json Parsing Error in Health Check\nNode Info: {} {} {}",
+			log.info("TcpNode: Json Parsing Error in Health Check\nNode Info: {} {} {}",
 				getProtocol(), getIpAddr(), getPort());
 		}
 		return false;
@@ -81,7 +82,7 @@ public class TcpNode extends Node {
 			clientOutputStream.flush();
 			clientSocket.close();
 		} catch (IOException e) {
-			logger.info("TcpNode: fail to forward packet\n{}", Arrays.toString(e.getStackTrace()));
+			log.info("TcpNode: fail to forward packet\n{}", Arrays.toString(e.getStackTrace()));
 			sendErrorMessage(clientSocket);
 		}
 	}
@@ -100,7 +101,7 @@ public class TcpNode extends Node {
 			outputStream.write(NodeMessageUtil.getForwardErrorMessage());
 			clientSocket.close();
 		} catch (IOException exception) {
-			logger.error("TcpNode: Error Occur in sendErrorMessage\n{}", Arrays.toString(exception.getStackTrace()));
+			log.error("TcpNode: Error Occur in sendErrorMessage\n{}", Arrays.toString(exception.getStackTrace()));
 		}
 	}
 

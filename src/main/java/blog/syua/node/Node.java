@@ -6,7 +6,9 @@ import java.net.UnknownHostException;
 import blog.syua.forward.ForwardInfo;
 import blog.syua.node.nodeimpl.TcpNode;
 import blog.syua.node.nodeimpl.UdpNode;
+import lombok.Getter;
 
+@Getter
 public abstract class Node {
 
 	private final InetAddress ipAddr;
@@ -28,14 +30,6 @@ public abstract class Node {
 	}
 
 	public abstract Protocol getProtocol();
-
-	public InetAddress getIpAddr() {
-		return ipAddr;
-	}
-
-	public int getPort() {
-		return port;
-	}
 
 	public abstract boolean isHealthy();
 

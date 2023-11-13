@@ -12,17 +12,14 @@ import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import blog.syua.node.Node;
 import blog.syua.node.NodeGroup;
 import blog.syua.node.nodeimpl.TcpNode;
 import blog.syua.utils.ThreadPoolUtils;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class TcpNodeGroup implements NodeGroup {
-
-	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	private final Queue<TcpNode> tcpNodes;
 	private final ExecutorService threadPool;
@@ -46,17 +43,17 @@ public class TcpNodeGroup implements NodeGroup {
 		}
 		isAvailable = true;
 		new Thread(() -> {
-			logger.info("TcpNodeManager: startForward {}", this);
+			log.info("TcpNodeManager: startForward {}", this);
 			Socket clientSocket;
 			try {
 				while (isAvailable && Objects.nonNull(clientSocket = listenSocket.accept())) {
-					logger.info("TcpNodeManager: connect new client {} {}", clientSocket.getInetAddress(),
+					log.info("TcpNodeManager: connect new client {} {}", clientSocket.getInetAddress(),
 						clientSocket.getPort());
 					Socket finalClientSocket = clientSocket;
 					threadPool.execute(() -> selectNode().forwardPacket(finalClientSocket));
 				}
 			} catch (IOException e) {
-				logger.error("UdpNodeManager: Error occur in startForward\n{}", Arrays.toString(e.getStackTrace()));
+				log.error("UdpNodeManager: Error occur in startForward\n{}", Arrays.toString(e.getStackTrace()));
 				throw new IllegalThreadStateException("패킷을 받을 수 없습니다");
 			}
 
@@ -74,7 +71,7 @@ public class TcpNodeGroup implements NodeGroup {
 			throw new IllegalArgumentException("TCP 노드가 아닙니다");
 		}
 		tcpNodes.offer((TcpNode)tcpNode);
-		logger.info("TcpNodeManager: registerNode {}", tcpNode);
+		log.info("TcpNodeManager: registerNode {}", tcpNode);
 	}
 
 	@Override
@@ -83,7 +80,7 @@ public class TcpNodeGroup implements NodeGroup {
 			throw new IllegalArgumentException("TCP 노드가 아닙니다");
 		}
 		tcpNodes.remove(tcpNode);
-		logger.info("TcpNodeManager: unregisterNode {}", tcpNode);
+		log.info("TcpNodeManager: unregisterNode {}", tcpNode);
 		if (tcpNodes.isEmpty()) {
 			isAvailable = false;
 			ThreadPoolUtils.removeThreadPool(threadPool, listenSocket);
