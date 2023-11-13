@@ -21,18 +21,12 @@ import lombok.extern.slf4j.Slf4j;
 public class UdpNode extends Node {
 
 	@Value("${loadbalancer.udp.timeout}")
-	public final int timeout = 3000;
+	public final int timeout = 5000;
 
-	@Value("${loadbalancer.healthcheck.timeout}")
-	private final int healthCheckTimeOut = 5000;
-
-	private final DatagramSocket nodeSocket;
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
 	public UdpNode(String ipAddr, int port) throws IOException {
 		super(ipAddr, port);
-		nodeSocket = new DatagramSocket();
-		nodeSocket.setSoTimeout(timeout);
 	}
 
 	@Override
@@ -42,8 +36,9 @@ public class UdpNode extends Node {
 
 	public void forwardPacket(DatagramSocket loadBalancerSocket, DatagramPacket clientPacket) {
 		try {
-			InetAddress nodeIpAddr = getIpAddr();
+			DatagramSocket nodeSocket = new DatagramSocket();
 			nodeSocket.setSoTimeout(timeout);
+			InetAddress nodeIpAddr = getIpAddr();
 			sendData(nodeSocket, nodeIpAddr, getPort(), clientPacket.getData());
 			DatagramPacket resultPacket = receiveData(nodeSocket);
 			sendData(loadBalancerSocket, clientPacket.getAddress(), clientPacket.getPort(),
@@ -57,18 +52,13 @@ public class UdpNode extends Node {
 	@Override
 	public boolean isHealthy() {
 		try (DatagramSocket socket = new DatagramSocket()) {
-			socket.setSoTimeout(healthCheckTimeOut);
+			socket.setSoTimeout(timeout);
 			return getHealthCheckResponse(socket);
 		} catch (IOException exception) {
 			log.error("UdpNode: Error occur in Health Check\n{}",
 				Arrays.toString(exception.getStackTrace()));
 		}
 		return false;
-	}
-
-	@Override
-	public void closeConnection() {
-		nodeSocket.close();
 	}
 
 	private boolean getHealthCheckResponse(DatagramSocket socket) throws IOException {

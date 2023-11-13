@@ -84,7 +84,6 @@ public class UdpNodeGroup implements NodeGroup {
 			throw new IllegalArgumentException("UDP 노드가 아닙니다");
 		}
 		udpNodes.remove(udpNode);
-		udpNode.closeConnection();
 		if (udpNodes.isEmpty()) {
 			isAvailable = false;
 			ThreadPoolUtils.removeThreadPool(threadPool, listenSocket);
