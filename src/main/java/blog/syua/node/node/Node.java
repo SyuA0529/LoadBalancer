@@ -3,7 +3,6 @@ package blog.syua.node.node;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import blog.syua.node.group.ForwardInfo;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 

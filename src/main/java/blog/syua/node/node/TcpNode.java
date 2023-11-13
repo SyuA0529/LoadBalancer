@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Value;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import blog.syua.node.group.ForwardInfo;
 import blog.syua.healthcheck.HealthCheckRequest;
 import blog.syua.healthcheck.HealthCheckResponse;
 import blog.syua.utils.NodeMessageUtil;
@@ -96,6 +95,16 @@ public class TcpNode extends Node {
 		} catch (IOException exception) {
 			log.error("TcpNode: Error Occur in sendErrorMessage\n{}", Arrays.toString(exception.getStackTrace()));
 		}
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		return super.equals(o);
+	}
+
+	@Override
+	public int hashCode() {
+		return super.hashCode();
 	}
 
 }

@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import blog.syua.node.group.ForwardInfo;
 import blog.syua.healthcheck.HealthCheckRequest;
 import blog.syua.healthcheck.HealthCheckResponse;
 import blog.syua.utils.NodeMessageUtil;
@@ -109,6 +108,16 @@ public class UdpNode extends Node {
 			endIndex--;
 		}
 		return Arrays.copyOf(data, endIndex + 1);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		return super.equals(o);
+	}
+
+	@Override
+	public int hashCode() {
+		return super.hashCode();
 	}
 
 }
