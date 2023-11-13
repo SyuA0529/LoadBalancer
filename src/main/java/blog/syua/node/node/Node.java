@@ -1,5 +1,6 @@
 package blog.syua.node.node;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -18,7 +19,7 @@ public abstract class Node {
 		this.port = port;
 	}
 
-	public static Node newInstance(Protocol protocol, String ipAddr, int port) throws UnknownHostException {
+	public static Node newInstance(Protocol protocol, String ipAddr, int port) throws IOException {
 		if (protocol.equals(Protocol.TCP)) {
 			return new TcpNode(ipAddr, port);
 		}
@@ -31,5 +32,7 @@ public abstract class Node {
 	public abstract Protocol getProtocol();
 
 	public abstract boolean isHealthy();
+
+	public abstract void closeConnection();
 
 }

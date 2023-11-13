@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -26,10 +25,13 @@ public class UdpNode extends Node {
 	@Value("${loadbalancer.healthcheck.timeout}")
 	private final int healthCheckTimeOut = 5000;
 
+	private final DatagramSocket nodeSocket;
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
-	public UdpNode(String ipAddr, int port) throws UnknownHostException {
+	public UdpNode(String ipAddr, int port) throws IOException {
 		super(ipAddr, port);
+		nodeSocket = new DatagramSocket();
+		nodeSocket.setSoTimeout(timeout);
 	}
 
 	@Override
@@ -38,7 +40,7 @@ public class UdpNode extends Node {
 	}
 
 	public void forwardPacket(DatagramSocket loadBalancerSocket, DatagramPacket clientPacket) {
-		try (DatagramSocket nodeSocket = new DatagramSocket()) {
+		try {
 			InetAddress nodeIpAddr = getIpAddr();
 			nodeSocket.setSoTimeout(timeout);
 			sendData(nodeSocket, nodeIpAddr, getPort(), clientPacket.getData());
@@ -61,6 +63,11 @@ public class UdpNode extends Node {
 				Arrays.toString(exception.getStackTrace()));
 		}
 		return false;
+	}
+
+	@Override
+	public void closeConnection() {
+		nodeSocket.close();
 	}
 
 	private boolean getHealthCheckResponse(DatagramSocket socket) throws IOException {

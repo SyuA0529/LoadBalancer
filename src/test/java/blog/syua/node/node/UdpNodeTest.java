@@ -7,7 +7,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.AfterAll;
@@ -96,7 +95,7 @@ class UdpNodeTest {
 		private UdpNode targetUdpNode;
 
 		@BeforeEach
-		void beforeEach() throws UnknownHostException {
+		void beforeEach() throws IOException {
 			targetUdpNode = new UdpNode(InetAddress.getLocalHost().getHostAddress(), 20000);
 		}
 

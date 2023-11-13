@@ -80,6 +80,7 @@ public class TcpNodeGroup implements NodeGroup {
 			throw new IllegalArgumentException("TCP 노드가 아닙니다");
 		}
 		tcpNodes.remove(tcpNode);
+		tcpNode.closeConnection();
 		log.info("TcpNodeGroup: UnregisterNode - {}", tcpNode);
 		if (tcpNodes.isEmpty()) {
 			isAvailable = false;

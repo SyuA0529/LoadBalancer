@@ -10,7 +10,6 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
@@ -100,7 +99,7 @@ class TcpNodeTest {
 		private TcpNode targetTcpNode;
 
 		@BeforeEach
-		void beforeEach() throws UnknownHostException {
+		void beforeEach() throws IOException {
 			targetTcpNode = new TcpNode(InetAddress.getLocalHost().getHostAddress(), 20000);
 		}
 

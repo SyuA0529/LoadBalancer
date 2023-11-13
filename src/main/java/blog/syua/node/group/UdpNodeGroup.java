@@ -61,7 +61,8 @@ public class UdpNodeGroup implements NodeGroup {
 					threadPool.execute(() -> selectNode().forwardPacket(listenSocket, forwardClientPacket));
 				}
 			} catch (SocketTimeoutException timeoutException) {
-				log.info("UdpNodeGroup: Socket Time Out - {Ip: {}, Port: {}}", clientPacket.getAddress(), clientPacket.getPort());
+				log.info("UdpNodeGroup: Socket Time Out - {Ip: {}, Port: {}}", clientPacket.getAddress(),
+					clientPacket.getPort());
 			} catch (IOException exception) {
 				checkSocketException(exception);
 			}
@@ -83,6 +84,7 @@ public class UdpNodeGroup implements NodeGroup {
 			throw new IllegalArgumentException("UDP 노드가 아닙니다");
 		}
 		udpNodes.remove(udpNode);
+		udpNode.closeConnection();
 		if (udpNodes.isEmpty()) {
 			isAvailable = false;
 			ThreadPoolUtils.removeThreadPool(threadPool, listenSocket);

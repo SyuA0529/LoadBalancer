@@ -8,7 +8,6 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
@@ -67,7 +66,7 @@ class UdpNodeGroupTest {
 	class MethodUnRegisterNode {
 		@Test
 		@DisplayName("UDP 노드가 존재하지 않을 경우 포워딩을 시작할 수 없다")
-		void cannotStartForwarding() throws UnknownHostException {
+		void cannotStartForwarding() throws IOException {
 			//given
 			UdpNode udpNode = new UdpNode(InetAddress.getLocalHost().getHostAddress(), 0);
 			udpNodeManager.registerNode(udpNode);

@@ -1,7 +1,6 @@
 package blog.syua.node.groupmanager;
 
 import java.io.IOException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -47,7 +46,7 @@ public class NodeGroupManagerImpl implements NodeGroupManager {
 	}
 
 	@Override
-	public void unRegisterNode(Protocol protocol, String ipAddr, int port) throws UnknownHostException {
+	public void unRegisterNode(Protocol protocol, String ipAddr, int port) throws IOException {
 		ForwardInfo forwardInfo = ForwardInfo.of(protocol, port);
 		NodeGroup nodeGroup = findNodeGroup(forwardInfo);
 		if (Objects.isNull(nodeGroup)) {

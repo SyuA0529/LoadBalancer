@@ -8,7 +8,6 @@ import java.io.OutputStream;
 import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -65,8 +64,8 @@ class TcpNodeGroupTest {
 	@DisplayName("Method: unRegisterNode")
 	class MethodUnRegisterNode {
 		@Test
-		@DisplayName("UDP 노드가 존재하지 않을 경우 포워딩를 시작할 수 없다")
-		void cannotStartForward() throws UnknownHostException {
+		@DisplayName("TCP 노드가 존재하지 않을 경우 포워딩를 시작할 수 없다")
+		void cannotStartForward() throws IOException {
 			//given
 			TcpNode tcpNode = new TcpNode(InetAddress.getLocalHost().getHostAddress(), TEST_PORT);
 			tcpNodeManager.registerNode(tcpNode);
@@ -83,7 +82,7 @@ class TcpNodeGroupTest {
 		@Test
 		@DisplayName("TCP 노드가 존재하지 않는 경우 더이상 새로운 요청을 처리하지 않는다")
 		void doNotProcessNewRequest() throws InterruptedException, IOException {
-		    //given
+			//given
 			TcpNode tcpNode = new TcpNode(InetAddress.getLocalHost().getHostAddress(), TEST_PORT);
 			tcpNodeManager.registerNode(tcpNode);
 			tcpNodeManager.startForwarding();
@@ -92,7 +91,7 @@ class TcpNodeGroupTest {
 			//when
 			tcpNodeManager.unRegisterNode(tcpNode);
 
-		    //then
+			//then
 			assertThatThrownBy(TcpNodeGroupTest.this::sendDataToNodeManager)
 				.isInstanceOf(ConnectException.class)
 				.hasMessage("Connection refused: connect");

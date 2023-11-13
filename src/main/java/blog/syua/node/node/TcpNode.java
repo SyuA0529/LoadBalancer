@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -24,10 +23,12 @@ public class TcpNode extends Node {
 	@Value("${loadbalancer.healthcheck.timeout}")
 	private final int healthCheckTimeout = Integer.MAX_VALUE;
 
+	private final Socket nodeSocket;
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
-	public TcpNode(String ipAddr, int port) throws UnknownHostException {
+	public TcpNode(String ipAddr, int port) throws IOException {
 		super(ipAddr, port);
+		nodeSocket = new Socket();
 	}
 
 	@Override
@@ -48,6 +49,31 @@ public class TcpNode extends Node {
 		return false;
 	}
 
+	public void forwardPacket(Socket clientSocket) {
+		try (InputStream clientInputStream = clientSocket.getInputStream();
+			 OutputStream clientOutputStream = clientSocket.getOutputStream()) {
+			if (!nodeSocket.isConnected()) {
+				nodeSocket.connect(new InetSocketAddress(getIpAddr(), getPort()));
+			}
+			byte[] resultData = forwardDataToNode(clientInputStream.readAllBytes());
+			clientOutputStream.write(resultData);
+			clientOutputStream.flush();
+			clientSocket.close();
+		} catch (IOException e) {
+			log.info("TcpNode: Fail to forward packet\n{}", Arrays.toString(e.getStackTrace()));
+			sendErrorMessage(clientSocket);
+		}
+	}
+
+	@Override
+	public void closeConnection() {
+		try {
+			nodeSocket.close();
+		} catch (IOException exception) {
+			log.error("TcpNode: Close Socket Error\n{}", Arrays.toString(exception.getStackTrace()));
+		}
+	}
+
 	private boolean getHealthCheckResult(Socket socket) throws IOException {
 		try (InputStream inputStream = socket.getInputStream();
 			 OutputStream outputStream = socket.getOutputStream()) {
@@ -66,22 +92,8 @@ public class TcpNode extends Node {
 		return false;
 	}
 
-	public void forwardPacket(Socket clientSocket) {
-		try (InputStream clientInputStream = clientSocket.getInputStream();
-			 OutputStream clientOutputStream = clientSocket.getOutputStream()) {
-			byte[] resultData = forwardDataToNode(clientInputStream.readAllBytes());
-			clientOutputStream.write(resultData);
-			clientOutputStream.flush();
-			clientSocket.close();
-		} catch (IOException e) {
-			log.info("TcpNode: Fail to forward packet\n{}", Arrays.toString(e.getStackTrace()));
-			sendErrorMessage(clientSocket);
-		}
-	}
-
 	private byte[] forwardDataToNode(byte[] forwardData) throws IOException {
-		try (Socket nodeSocket = new Socket(getIpAddr(), getPort());
-			 InputStream nodeInputStream = nodeSocket.getInputStream();
+		try (InputStream nodeInputStream = nodeSocket.getInputStream();
 			 OutputStream nodeOutputStream = nodeSocket.getOutputStream()) {
 			nodeOutputStream.write(forwardData);
 			return nodeInputStream.readAllBytes();
