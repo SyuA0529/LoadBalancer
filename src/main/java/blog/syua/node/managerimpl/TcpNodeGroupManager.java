@@ -16,11 +16,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import blog.syua.node.Node;
-import blog.syua.node.NodeManager;
+import blog.syua.node.NodeGroupManager;
 import blog.syua.node.nodeimpl.TcpNode;
 import blog.syua.utils.ThreadPoolUtils;
 
-public class TcpNodeManager implements NodeManager {
+public class TcpNodeGroupManager implements NodeGroupManager {
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -29,7 +29,7 @@ public class TcpNodeManager implements NodeManager {
 	private final ServerSocket listenSocket;
 	private boolean isAvailable;
 
-	public TcpNodeManager(int port) throws IOException {
+	public TcpNodeGroupManager(int port) throws IOException {
 		tcpNodes = new LinkedList<>();
 		listenSocket = new ServerSocket(port);
 		isAvailable = false;
@@ -40,6 +40,9 @@ public class TcpNodeManager implements NodeManager {
 	public void startForwarding() {
 		if (tcpNodes.isEmpty()) {
 			throw new IllegalStateException("포워딩을 시작할 수 없습니다");
+		}
+		if (isAvailable) {
+			throw new IllegalStateException("이미 포워딩이 진행중입니다");
 		}
 		isAvailable = true;
 		new Thread(() -> {

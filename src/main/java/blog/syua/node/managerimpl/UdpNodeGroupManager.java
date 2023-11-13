@@ -17,11 +17,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import blog.syua.node.Node;
-import blog.syua.node.NodeManager;
+import blog.syua.node.NodeGroupManager;
 import blog.syua.node.nodeimpl.UdpNode;
 import blog.syua.utils.ThreadPoolUtils;
 
-public class UdpNodeManager implements NodeManager {
+public class UdpNodeGroupManager implements NodeGroupManager {
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -30,7 +30,7 @@ public class UdpNodeManager implements NodeManager {
 	private final DatagramSocket listenSocket;
 	private boolean isAvailable;
 
-	public UdpNodeManager(int port) throws SocketException {
+	public UdpNodeGroupManager(int port) throws SocketException {
 		udpNodes = new LinkedList<>();
 		listenSocket = new DatagramSocket(port);
 		listenSocket.setSoTimeout(UdpNode.TIME_OUT);
@@ -42,6 +42,9 @@ public class UdpNodeManager implements NodeManager {
 	public void startForwarding() {
 		if (udpNodes.isEmpty()) {
 			throw new IllegalStateException("포워딩을 시작할 수 없습니다");
+		}
+		if (isAvailable) {
+			throw new IllegalStateException("이미 포워딩이 진행중입니다");
 		}
 		isAvailable = true;
 		new Thread(() -> {

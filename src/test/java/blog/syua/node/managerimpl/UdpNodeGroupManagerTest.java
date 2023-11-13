@@ -20,15 +20,15 @@ import org.junit.jupiter.api.Test;
 import blog.syua.node.nodeimpl.UdpNode;
 
 @DisplayName("UDP Node Manager 테스트")
-class UdpNodeManagerTest {
+class UdpNodeGroupManagerTest {
 
 	private static final int TEST_PORT = 10003;
 
-	private UdpNodeManager udpNodeManager;
+	private UdpNodeGroupManager udpNodeManager;
 
 	@BeforeEach
 	void beforeEach() throws SocketException {
-		udpNodeManager = new UdpNodeManager(TEST_PORT);
+		udpNodeManager = new UdpNodeGroupManager(TEST_PORT);
 	}
 
 	@Nested
@@ -94,7 +94,7 @@ class UdpNodeManagerTest {
 			udpNodeManager.unRegisterNode(udpNode);
 
 			//then
-			assertThatThrownBy(UdpNodeManagerTest::sendDataToNodeManager)
+			assertThatThrownBy(UdpNodeGroupManagerTest::sendDataToNodeManager)
 				.isInstanceOf(SocketTimeoutException.class)
 				.hasMessage("Receive timed out");
 		}
