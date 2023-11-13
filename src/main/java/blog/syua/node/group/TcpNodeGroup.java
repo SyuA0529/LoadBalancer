@@ -11,6 +11,8 @@ import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.springframework.beans.factory.annotation.Value;
+
 import blog.syua.node.node.Node;
 import blog.syua.node.node.Protocol;
 import blog.syua.node.node.TcpNode;
@@ -21,6 +23,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class TcpNodeGroup implements NodeGroup {
 
+	@Value("${loadbalancer.tcp.thread-pool-size}")
+	private final int threadPoolSize = Runtime.getRuntime().availableProcessors();
+
 	private final Queue<TcpNode> tcpNodes;
 	private final ExecutorService threadPool;
 	private final ServerSocket listenSocket;
@@ -30,7 +35,7 @@ public class TcpNodeGroup implements NodeGroup {
 		tcpNodes = new LinkedList<>();
 		listenSocket = new ServerSocket(port);
 		isAvailable = false;
-		threadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+		threadPool = Executors.newFixedThreadPool(threadPoolSize);
 	}
 
 	@Override
