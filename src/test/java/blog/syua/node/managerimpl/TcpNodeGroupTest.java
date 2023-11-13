@@ -99,7 +99,6 @@ class TcpNodeGroupTest {
 	}
 
 	private String sendDataToNodeManager() throws IOException {
-		System.out.println("start sendData");
 		Socket clientSocket = new Socket(InetAddress.getLocalHost(), TEST_PORT);
 		OutputStream outputStream = clientSocket.getOutputStream();
 		outputStream.write("Client Data".getBytes(StandardCharsets.UTF_8));
