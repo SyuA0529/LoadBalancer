@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 public class UdpNodeGroup implements NodeGroup {
 
 	@Value("${loadbalancer.udp.timeout}")
-	public final int timeOut = 3000;
+	public final int timeout = 3000;
 	private final Queue<UdpNode> udpNodes;
 	private final ExecutorService threadPool;
 	private final DatagramSocket listenSocket;
@@ -32,7 +32,7 @@ public class UdpNodeGroup implements NodeGroup {
 	public UdpNodeGroup(int port) throws SocketException {
 		udpNodes = new LinkedList<>();
 		listenSocket = new DatagramSocket(port);
-		listenSocket.setSoTimeout(timeOut);
+		listenSocket.setSoTimeout(timeout);
 		isAvailable = false;
 		threadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 	}

@@ -25,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 public class TcpNode extends Node {
 
 	@Value("${loadbalancer.healthcheck.timeout}")
-	private final int HEALTH_CHECK_TIME_OUT = Integer.MAX_VALUE;
+	private final int healthCheckTimeout = Integer.MAX_VALUE;
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -41,7 +41,7 @@ public class TcpNode extends Node {
 	@Override
 	public boolean isHealthy() {
 		try (Socket socket = new Socket()) {
-			socket.setSoTimeout(HEALTH_CHECK_TIME_OUT);
+			socket.setSoTimeout(healthCheckTimeout);
 			socket.connect(new InetSocketAddress(getIpAddr(), getPort()));
 			return getHealthCheckResult(socket);
 		} catch (IOException exception) {
