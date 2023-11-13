@@ -10,7 +10,6 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
@@ -97,13 +96,13 @@ class TcpNodeTest {
 		@Test
 		@DisplayName("노드에게 받은 데이터를 포워딩할 수 없는 경우 에러 메세지를 반환한다")
 		void returnErrorMessage() throws IOException {
-		    //given
+			//given
 			TcpNode deadTcpNode = new TcpNode(InetAddress.getLocalHost().getHostAddress(), 0);
 
 			//when
 			deadTcpNode.forwardPacket(clientSocket);
 
-		    //then
+			//then
 			byte[] result = clientSocketOutputStream.toByteArray();
 			assertThat(result).containsExactly(NodeMessageUtil.getForwardErrorMessage());
 		}
@@ -140,7 +139,7 @@ class TcpNodeTest {
 		@Test
 		@DisplayName("노드가 보낸 응답의 파싱에 실패한 경우 false를 반환한다")
 		void returnFalseWhenParsingFail() throws IOException {
-		    //given
+			//given
 			TcpNode targetTcpNode = new TcpNode(InetAddress.getLocalHost().getHostAddress(), 20000);
 			Thread nodeThread = getHealthCheckNodeThread(20001, false);
 			nodeThread.start();

@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -81,7 +80,7 @@ public class TcpNode extends Node {
 	}
 
 	private byte[] forwardDataToNode(byte[] forwardData) throws IOException {
-		try (Socket nodeSocket = new Socket()){
+		try (Socket nodeSocket = new Socket()) {
 			nodeSocket.setSoTimeout(tcpTimeOut);
 			nodeSocket.connect(new InetSocketAddress(getIpAddr(), getPort()));
 			byte[] resultData;
