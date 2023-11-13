@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
@@ -24,6 +25,7 @@ import org.mockito.Mock;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import blog.syua.healthcheck.HealthCheckResponse;
+import blog.syua.utils.NodeMessageUtil;
 
 @DisplayName("TCP 노드 테스트")
 class TcpNodeTest {
@@ -91,23 +93,31 @@ class TcpNodeTest {
 			String result = clientSocketOutputStream.toString(StandardCharsets.UTF_8);
 			assertThat(result).isEqualTo("Hello");
 		}
+
+		@Test
+		@DisplayName("노드에게 받은 데이터를 포워딩할 수 없는 경우 에러 메세지를 반환한다")
+		void returnErrorMessage() throws IOException {
+		    //given
+			TcpNode deadTcpNode = new TcpNode(InetAddress.getLocalHost().getHostAddress(), 0);
+
+			//when
+			deadTcpNode.forwardPacket(clientSocket);
+
+		    //then
+			byte[] result = clientSocketOutputStream.toByteArray();
+			assertThat(result).containsExactly(NodeMessageUtil.getForwardErrorMessage());
+		}
 	}
 
 	@Nested
 	@DisplayName("Method: isHealthy")
 	class MethodIsHealthy {
-		private TcpNode targetTcpNode;
-
-		@BeforeEach
-		void beforeEach() throws IOException {
-			targetTcpNode = new TcpNode(InetAddress.getLocalHost().getHostAddress(), 20000);
-		}
-
 		@Test
 		@DisplayName("노드가 살아있는 경우 true를 반환한다")
-		void returnTrue() {
+		void returnTrue() throws IOException {
 			//given
-			Thread nodeThread = getHealthCheckNodeThread();
+			TcpNode targetTcpNode = new TcpNode(InetAddress.getLocalHost().getHostAddress(), 20000);
+			Thread nodeThread = getHealthCheckNodeThread(20000, true);
 			nodeThread.start();
 
 			//when
@@ -118,23 +128,44 @@ class TcpNodeTest {
 
 		@Test
 		@DisplayName("노드가 죽어있는 경우 false를 반환한다")
-		void returnFalse() {
+		void returnFalseWhenNodeDead() throws IOException {
 			//given
+			TcpNode targetTcpNode = new TcpNode(InetAddress.getLocalHost().getHostAddress(), 20000);
+
 			//when
 			//then
 			assertThat(targetTcpNode.isHealthy()).isFalse();
 		}
 
-		private Thread getHealthCheckNodeThread() {
+		@Test
+		@DisplayName("노드가 보낸 응답의 파싱에 실패한 경우 false를 반환한다")
+		void returnFalseWhenParsingFail() throws IOException {
+		    //given
+			TcpNode targetTcpNode = new TcpNode(InetAddress.getLocalHost().getHostAddress(), 20000);
+			Thread nodeThread = getHealthCheckNodeThread(20001, false);
+			nodeThread.start();
+
+			//when
+			//then
+			assertThat(targetTcpNode.isHealthy()).isFalse();
+			nodeThread.interrupt();
+		}
+
+		private Thread getHealthCheckNodeThread(int port, boolean isCorrect) {
 			return new Thread(() -> {
 				try {
-					ServerSocket serverSocket = new ServerSocket(20000);
+					ServerSocket serverSocket = new ServerSocket(port);
 					Socket clientSocket;
 					while (Objects.nonNull(clientSocket = serverSocket.accept())) {
 						OutputStream outputStream = clientSocket.getOutputStream();
-						HealthCheckResponse response = new HealthCheckResponse();
-						response.setHealthy();
-						outputStream.write(new ObjectMapper().writeValueAsBytes(response));
+						if (isCorrect) {
+							HealthCheckResponse response = new HealthCheckResponse();
+							response.setHealthy();
+							outputStream.write(new ObjectMapper().writeValueAsBytes(response));
+						} else {
+							outputStream.write("Wrong".getBytes(StandardCharsets.UTF_8));
+						}
+						outputStream.flush();
 						outputStream.close();
 						clientSocket.close();
 					}

@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import blog.syua.healthcheck.HealthCheckResponse;
+import blog.syua.utils.NodeMessageUtil;
 
 @DisplayName("UDP 노드 테스트")
 class UdpNodeTest {
@@ -87,6 +88,29 @@ class UdpNodeTest {
 			assertThat(new String(resultPacket[0].getData(), StandardCharsets.UTF_8).replace("\u0000", ""))
 				.isEqualTo("Hello");
 		}
+
+		@Test
+		@DisplayName("노드에게 받은 데이터를 포워딩할 수 없는 경우 에러 메세지를 반환한다")
+		void returnErrorMessage() throws IOException {
+			//given
+			UdpNode deadUdpNode = new UdpNode(InetAddress.getLocalHost().getHostAddress(), 10);
+			byte[] clientData = "client data".getBytes(StandardCharsets.UTF_8);
+			DatagramPacket clientPacket = new DatagramPacket(clientData, clientData.length,
+				InetAddress.getLoopbackAddress(), TEST_PORT);
+			final DatagramPacket[] resultPacket = new DatagramPacket[1];
+
+			//when
+			deadUdpNode.forwardPacket(new DatagramSocket(6000) {
+				@Override
+				public void send(DatagramPacket packet) {
+					resultPacket[0] = packet;
+				}
+			}, clientPacket);
+
+			//then
+			assertThat(new String(resultPacket[0].getData(), StandardCharsets.UTF_8).replace("\u0000", ""))
+				.isEqualTo(new String(NodeMessageUtil.getForwardErrorMessage(), StandardCharsets.UTF_8));
+		}
 	}
 
 	@Nested
@@ -103,7 +127,7 @@ class UdpNodeTest {
 		@DisplayName("노드가 살아있는 경우 true를 반환한다")
 		void returnTrue() {
 			//given
-			Thread nodeThread = getHealthCheckNodeThread();
+			Thread nodeThread = getHealthCheckNodeThread(20000, true);
 			nodeThread.start();
 
 			//when
@@ -120,16 +144,35 @@ class UdpNodeTest {
 			assertThat(targetUdpNode.isHealthy()).isFalse();
 		}
 
-		private Thread getHealthCheckNodeThread() {
+		@Test
+		@DisplayName("노드가 보낸 응답의 파싱에 실패한 경우 false를 반환한다")
+		void returnFalseWhenParsingFail() throws IOException {
+			//given
+			UdpNode targetUdpNode = new UdpNode(InetAddress.getLocalHost().getHostAddress(), 20000);
+			Thread nodeThread = getHealthCheckNodeThread(20001, false);
+			nodeThread.start();
+
+			//when
+			//then
+			assertThat(targetUdpNode.isHealthy()).isFalse();
+			nodeThread.interrupt();
+		}
+
+		private Thread getHealthCheckNodeThread(int port, boolean isCorrect) {
 			return new Thread(() -> {
-				try (DatagramSocket serverSocket = new DatagramSocket(20000)) {
+				try (DatagramSocket serverSocket = new DatagramSocket(port)) {
 					DatagramPacket clientPacket = new DatagramPacket(new byte[serverSocket.getReceiveBufferSize()],
 						serverSocket.getReceiveBufferSize());
 					while (true) {
 						serverSocket.receive(clientPacket);
-						HealthCheckResponse response = new HealthCheckResponse();
-						response.setHealthy();
-						byte[] responseBytes = new ObjectMapper().writeValueAsBytes(response);
+						byte[] responseBytes;
+						if (isCorrect) {
+							HealthCheckResponse response = new HealthCheckResponse();
+							response.setHealthy();
+							responseBytes = new ObjectMapper().writeValueAsBytes(response);
+						} else {
+							responseBytes = "Wrong".getBytes(StandardCharsets.UTF_8);
+						}
 						DatagramPacket responsePacket = new DatagramPacket(responseBytes, responseBytes.length,
 							clientPacket.getAddress(), clientPacket.getPort());
 						serverSocket.send(responsePacket);
