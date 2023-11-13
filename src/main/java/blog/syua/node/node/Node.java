@@ -33,6 +33,4 @@ public abstract class Node {
 
 	public abstract boolean isHealthy();
 
-	public abstract ForwardInfo getForwardInfo();
-
 }

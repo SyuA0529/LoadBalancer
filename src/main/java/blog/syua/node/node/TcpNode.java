@@ -49,11 +49,6 @@ public class TcpNode extends Node {
 		return false;
 	}
 
-	@Override
-	public ForwardInfo getForwardInfo() {
-		return ForwardInfo.of(Protocol.TCP, getPort());
-	}
-
 	private boolean getHealthCheckResult(Socket socket) throws IOException {
 		try (InputStream inputStream = socket.getInputStream();
 			 OutputStream outputStream = socket.getOutputStream()) {

@@ -64,11 +64,6 @@ public class UdpNode extends Node {
 		return false;
 	}
 
-	@Override
-	public ForwardInfo getForwardInfo() {
-		return ForwardInfo.of(Protocol.UDP, getPort());
-	}
-
 	private boolean getHealthCheckResponse(DatagramSocket socket) throws IOException {
 		try {
 			byte[] requestMessage = objectMapper.writeValueAsBytes(HealthCheckRequest.getInstance());
