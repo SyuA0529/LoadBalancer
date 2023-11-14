@@ -25,7 +25,7 @@ import org.mockito.Mock;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import blog.syua.healthcheck.HealthCheckResponse;
+import blog.syua.healthcheck.dto.HealthCheckResponse;
 import blog.syua.utils.NodeMessageUtil;
 import nl.altindag.log.LogCaptor;
 
@@ -76,7 +76,7 @@ class TcpNodeTest {
 	@BeforeEach
 	void beforeEach() throws IOException {
 		softAssertions = new SoftAssertions();
-		tcpNode = new TcpNode(InetAddress.getLoopbackAddress().getHostAddress(), TEST_PORT);
+		tcpNode = new TcpNode(InetAddress.getLoopbackAddress(), TEST_PORT);
 		clientSocket = mock(Socket.class);
 		when(clientSocket.getInputStream()).thenReturn(new ByteArrayInputStream(clientSocketData));
 		when(clientSocket.getOutputStream()).thenReturn(clientSocketOutputStream);
@@ -109,7 +109,7 @@ class TcpNodeTest {
 		@DisplayName("노드에게 받은 데이터를 포워딩할 수 없는 경우 에러 메세지를 반환한다")
 		void returnErrorMessage() throws IOException {
 			//given
-			TcpNode deadTcpNode = new TcpNode(InetAddress.getLocalHost().getHostAddress(), 0);
+			TcpNode deadTcpNode = new TcpNode(InetAddress.getLocalHost(), 0);
 
 			//when
 			deadTcpNode.forwardPacket(clientSocket);
@@ -127,7 +127,7 @@ class TcpNodeTest {
 		@DisplayName("노드가 살아있는 경우 true를 반환한다")
 		void returnTrue() throws IOException {
 			//given
-			TcpNode targetTcpNode = new TcpNode(InetAddress.getLocalHost().getHostAddress(), 20000);
+			TcpNode targetTcpNode = new TcpNode(InetAddress.getLocalHost(), 20000);
 			Thread nodeThread = getHealthCheckNodeThread(20000, true);
 			nodeThread.start();
 
@@ -141,7 +141,7 @@ class TcpNodeTest {
 		@DisplayName("노드가 죽어있는 경우 false를 반환한다")
 		void returnFalseWhenNodeDead() throws IOException {
 			//given
-			TcpNode targetTcpNode = new TcpNode(InetAddress.getLocalHost().getHostAddress(), 20000);
+			TcpNode targetTcpNode = new TcpNode(InetAddress.getLocalHost(), 20000);
 
 			//when
 			//then
@@ -152,7 +152,7 @@ class TcpNodeTest {
 		@DisplayName("노드가 보낸 응답의 파싱에 실패한 경우 false를 반환한다")
 		void returnFalseWhenParsingFail() throws IOException {
 			//given
-			TcpNode targetTcpNode = new TcpNode(InetAddress.getLocalHost().getHostAddress(), 20001);
+			TcpNode targetTcpNode = new TcpNode(InetAddress.getLocalHost(), 20001);
 			Thread nodeThread = getHealthCheckNodeThread(20001, false);
 			nodeThread.start();
 			LogCaptor logCaptor = LogCaptor.forClass(TcpNode.class);

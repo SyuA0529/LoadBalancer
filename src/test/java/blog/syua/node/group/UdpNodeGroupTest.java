@@ -37,7 +37,7 @@ class UdpNodeGroupTest {
 		@DisplayName("등록된 UDP 노드로 포워딩을 수행한다")
 		void forwardToRegisteredUdpNode() throws IOException {
 			//given
-			UdpNode mockedUdpNode = new UdpNode(InetAddress.getLocalHost().getHostAddress(), TEST_PORT) {
+			UdpNode mockedUdpNode = new UdpNode(InetAddress.getLocalHost(), TEST_PORT) {
 				@Override
 				public void forwardPacket(DatagramSocket loadBalancerSocket, DatagramPacket clientPacket) {
 					try {
@@ -68,7 +68,7 @@ class UdpNodeGroupTest {
 		@DisplayName("UDP 노드가 존재하지 않을 경우 포워딩을 시작할 수 없다")
 		void cannotStartForwarding() throws IOException {
 			//given
-			UdpNode udpNode = new UdpNode(InetAddress.getLocalHost().getHostAddress(), 0);
+			UdpNode udpNode = new UdpNode(InetAddress.getLocalHost(), 0);
 			udpNodeManager.registerNode(udpNode);
 
 			//when
@@ -84,7 +84,7 @@ class UdpNodeGroupTest {
 		@DisplayName("UDP 노드가 존재하지 않는 경우 더이상 새로운 요청을 처리하지 않는다")
 		void doNotProcessNewRequest() throws InterruptedException, IOException {
 			//given
-			UdpNode udpNode = new UdpNode(InetAddress.getLocalHost().getHostAddress(), TEST_PORT);
+			UdpNode udpNode = new UdpNode(InetAddress.getLocalHost(), TEST_PORT);
 			udpNodeManager.registerNode(udpNode);
 			udpNodeManager.startForwarding();
 			Thread.sleep(1000);

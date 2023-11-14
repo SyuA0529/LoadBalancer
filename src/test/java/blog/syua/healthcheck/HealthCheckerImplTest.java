@@ -157,7 +157,7 @@ class HealthCheckerImplTest {
 	}
 
 	private static UdpNode getMockedUdpNode(Supplier<Boolean> supplier) throws IOException {
-		return new UdpNode(InetAddress.getLocalHost().getHostAddress(), 0) {
+		return new UdpNode(InetAddress.getLocalHost(), 0) {
 			@Override
 			public boolean isHealthy() {
 				return supplier.get();
@@ -166,7 +166,7 @@ class HealthCheckerImplTest {
 	}
 
 	private static TcpNode getMockedTcpNode(Supplier<Boolean> supplier) throws IOException {
-		return new TcpNode(InetAddress.getLocalHost().getHostAddress(), 0) {
+		return new TcpNode(InetAddress.getLocalHost(), 0) {
 			@Override
 			public boolean isHealthy() {
 				return supplier.get();

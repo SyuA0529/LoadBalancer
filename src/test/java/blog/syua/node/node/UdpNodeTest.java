@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import blog.syua.healthcheck.HealthCheckResponse;
+import blog.syua.healthcheck.dto.HealthCheckResponse;
 import blog.syua.utils.NodeMessageUtil;
 import nl.altindag.log.LogCaptor;
 
@@ -60,7 +60,7 @@ class UdpNodeTest {
 	@BeforeEach
 	void beforeEach() throws IOException {
 		softAssertions = new SoftAssertions();
-		udpNode = new UdpNode(InetAddress.getLoopbackAddress().getHostAddress(), TEST_PORT);
+		udpNode = new UdpNode(InetAddress.getLoopbackAddress(), TEST_PORT);
 	}
 
 	@AfterAll
@@ -98,7 +98,7 @@ class UdpNodeTest {
 		@DisplayName("노드에게 받은 데이터를 포워딩할 수 없는 경우 에러 메세지를 반환한다")
 		void returnErrorMessage() throws IOException {
 			//given
-			UdpNode deadUdpNode = new UdpNode(InetAddress.getLocalHost().getHostAddress(), 30000);
+			UdpNode deadUdpNode = new UdpNode(InetAddress.getLocalHost(), 30000);
 			byte[] clientData = "client data".getBytes(StandardCharsets.UTF_8);
 			DatagramPacket clientPacket = new DatagramPacket(clientData, clientData.length,
 				InetAddress.getLoopbackAddress(), TEST_PORT);
@@ -125,7 +125,7 @@ class UdpNodeTest {
 		@DisplayName("노드가 살아있는 경우 true를 반환한다")
 		void returnTrue() throws IOException {
 			//given
-			UdpNode targetUdpNode = new UdpNode(InetAddress.getLocalHost().getHostAddress(), 20000);
+			UdpNode targetUdpNode = new UdpNode(InetAddress.getLocalHost(), 20000);
 			Thread nodeThread = getHealthCheckNodeThread(20000, true);
 			nodeThread.start();
 
@@ -138,7 +138,7 @@ class UdpNodeTest {
 		@DisplayName("노드가 죽어있는 경우 false를 반환한다")
 		void returnFalse() throws IOException {
 			//given
-			UdpNode targetUdpNode = new UdpNode(InetAddress.getLocalHost().getHostAddress(), 0);
+			UdpNode targetUdpNode = new UdpNode(InetAddress.getLocalHost(), 0);
 
 			//when
 			//then
@@ -149,7 +149,7 @@ class UdpNodeTest {
 		@DisplayName("노드가 보낸 응답의 파싱에 실패한 경우 false를 반환한다")
 		void returnFalseWhenParsingFail() throws IOException {
 			//given
-			UdpNode targetUdpNode = new UdpNode(InetAddress.getLocalHost().getHostAddress(), 20001);
+			UdpNode targetUdpNode = new UdpNode(InetAddress.getLocalHost(), 20001);
 			Thread nodeThread = getHealthCheckNodeThread(20001, false);
 			nodeThread.start();
 			LogCaptor logCaptor = LogCaptor.forClass(UdpNode.class);

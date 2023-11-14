@@ -1,6 +1,7 @@
 package blog.syua.node.groupmanager;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -27,7 +28,7 @@ public class NodeGroupManagerImpl implements NodeGroupManager {
 	}
 
 	@Override
-	public void registerNode(Protocol protocol, String ipAddr, int port) throws IOException {
+	public void registerNode(Protocol protocol, InetAddress ipAddr, int port) throws IOException {
 		ForwardInfo forwardInfo = ForwardInfo.of(protocol, port);
 		boolean isNewGroup = false;
 		NodeGroup nodeGroup = findNodeGroup(forwardInfo);
@@ -46,7 +47,7 @@ public class NodeGroupManagerImpl implements NodeGroupManager {
 	}
 
 	@Override
-	public void unRegisterNode(Protocol protocol, String ipAddr, int port) throws IOException {
+	public void unRegisterNode(Protocol protocol, InetAddress ipAddr, int port) throws IOException {
 		ForwardInfo forwardInfo = ForwardInfo.of(protocol, port);
 		NodeGroup nodeGroup = findNodeGroup(forwardInfo);
 		if (Objects.isNull(nodeGroup)) {

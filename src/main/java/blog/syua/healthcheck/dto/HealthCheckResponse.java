@@ -1,4 +1,4 @@
-package blog.syua.healthcheck;
+package blog.syua.healthcheck.dto;
 
 import org.springframework.beans.factory.annotation.Value;
 

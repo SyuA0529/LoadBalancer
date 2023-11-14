@@ -45,12 +45,12 @@ class NodeGroupManagerImplTest {
 		@DisplayName("새로운 유형의 포워딩 정보일 경우 새로 노드를 생성하고, 새로 생성한 노드 그룹에 이를 저장한다")
 		void RegisterNodeToNewNodeGroup() throws IOException, ReflectiveOperationException {
 			//given
-			TcpNode tcpNode = new TcpNode(InetAddress.getLocalHost().getHostAddress(), 0);
-			UdpNode udpNode = new UdpNode(InetAddress.getLocalHost().getHostAddress(), 0);
+			TcpNode tcpNode = new TcpNode(InetAddress.getLocalHost(), 0);
+			UdpNode udpNode = new UdpNode(InetAddress.getLocalHost(), 0);
 
 			//when
-			nodeGroupManager.registerNode(Protocol.TCP, tcpNode.getIpAddr().getHostAddress(), tcpNode.getPort());
-			nodeGroupManager.registerNode(Protocol.UDP, udpNode.getIpAddr().getHostAddress(), udpNode.getPort());
+			nodeGroupManager.registerNode(Protocol.TCP, tcpNode.getIpAddr(), tcpNode.getPort());
+			nodeGroupManager.registerNode(Protocol.UDP, udpNode.getIpAddr(), udpNode.getPort());
 
 			//then
 			ConcurrentHashMap<ForwardInfo, NodeGroup> nodeGroups =
@@ -67,17 +67,15 @@ class NodeGroupManagerImplTest {
 		@DisplayName("기존 유형의 포워딩 정보인 경우 새로 노드를 생성하고, 해당하는 기존 노드 그룹에 이를 저장한다")
 		void registerNodeToExistingNodeGroup() throws IOException, ReflectiveOperationException {
 			//given
-			nodeGroupManager.registerNode(Protocol.TCP, InetAddress.getLocalHost().getHostAddress(), 0);
-			nodeGroupManager.registerNode(Protocol.UDP, InetAddress.getLocalHost().getHostAddress(), 0);
+			nodeGroupManager.registerNode(Protocol.TCP, InetAddress.getLocalHost(), 0);
+			nodeGroupManager.registerNode(Protocol.UDP, InetAddress.getLocalHost(), 0);
 
-			TcpNode tcpNode = new TcpNode(InetAddress.getLocalHost().getHostAddress(), 0);
-			UdpNode udpNode = new UdpNode(InetAddress.getLocalHost().getHostAddress(), 1);
+			TcpNode tcpNode = new TcpNode(InetAddress.getLocalHost(), 0);
+			UdpNode udpNode = new UdpNode(InetAddress.getLocalHost(), 1);
 
 			//when
-			nodeGroupManager.registerNode(tcpNode.getProtocol(),
-				tcpNode.getIpAddr().getHostAddress(), tcpNode.getPort());
-			nodeGroupManager.registerNode(udpNode.getProtocol(),
-				udpNode.getIpAddr().getHostAddress(), udpNode.getPort());
+			nodeGroupManager.registerNode(tcpNode.getProtocol(), tcpNode.getIpAddr(), tcpNode.getPort());
+			nodeGroupManager.registerNode(udpNode.getProtocol(), udpNode.getIpAddr(), udpNode.getPort());
 
 			//then
 			ConcurrentHashMap<ForwardInfo, NodeGroup> nodeGroups = (ConcurrentHashMap<ForwardInfo, NodeGroup>)
@@ -103,16 +101,14 @@ class NodeGroupManagerImplTest {
 		@DisplayName("존재하는 노드인 경우 노드 그룹에서 이를 삭제한다")
 		void removeNodeFromNodeGroup() throws IOException, ReflectiveOperationException {
 			//given
-			TcpNode tcpNode = new TcpNode(InetAddress.getLocalHost().getHostAddress(), 0);
-			UdpNode udpNode = new UdpNode(InetAddress.getLocalHost().getHostAddress(), 0);
-			nodeGroupManager.registerNode(Protocol.TCP, tcpNode.getIpAddr().getHostAddress(), tcpNode.getPort());
-			nodeGroupManager.registerNode(Protocol.UDP, udpNode.getIpAddr().getHostAddress(), udpNode.getPort());
+			TcpNode tcpNode = new TcpNode(InetAddress.getLocalHost(), 0);
+			UdpNode udpNode = new UdpNode(InetAddress.getLocalHost(), 0);
+			nodeGroupManager.registerNode(Protocol.TCP, tcpNode.getIpAddr(), tcpNode.getPort());
+			nodeGroupManager.registerNode(Protocol.UDP, udpNode.getIpAddr(), udpNode.getPort());
 
 			//when
-			nodeGroupManager.unRegisterNode(tcpNode.getProtocol(),
-				tcpNode.getIpAddr().getHostAddress(), tcpNode.getPort());
-			nodeGroupManager.unRegisterNode(udpNode.getProtocol(),
-				udpNode.getIpAddr().getHostAddress(), udpNode.getPort());
+			nodeGroupManager.unRegisterNode(tcpNode.getProtocol(), tcpNode.getIpAddr(), tcpNode.getPort());
+			nodeGroupManager.unRegisterNode(udpNode.getProtocol(), udpNode.getIpAddr(), udpNode.getPort());
 
 			//then
 			ConcurrentHashMap<ForwardInfo, NodeGroup> nodeGroups = (ConcurrentHashMap<ForwardInfo, NodeGroup>)
@@ -127,7 +123,7 @@ class NodeGroupManagerImplTest {
 			//when
 			//then
 			Assertions.assertThatThrownBy(() ->
-					nodeGroupManager.unRegisterNode(Protocol.TCP, InetAddress.getLocalHost().getHostAddress(), 3))
+					nodeGroupManager.unRegisterNode(Protocol.TCP, InetAddress.getLocalHost(), 3))
 				.isInstanceOf(IllegalArgumentException.class)
 				.hasMessage("존재하지 않는 노드입니다");
 		}

@@ -12,8 +12,8 @@ import org.springframework.beans.factory.annotation.Value;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import blog.syua.healthcheck.HealthCheckRequest;
-import blog.syua.healthcheck.HealthCheckResponse;
+import blog.syua.healthcheck.dto.HealthCheckRequest;
+import blog.syua.healthcheck.dto.HealthCheckResponse;
 import blog.syua.utils.NodeMessageUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,7 +25,7 @@ public class UdpNode extends Node {
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
-	public UdpNode(String ipAddr, int port) throws IOException {
+	public UdpNode(InetAddress ipAddr, int port) throws IOException {
 		super(ipAddr, port);
 	}
 

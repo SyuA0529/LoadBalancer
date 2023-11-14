@@ -3,6 +3,7 @@ package blog.syua.node.node;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Arrays;
@@ -13,8 +14,8 @@ import org.springframework.beans.factory.annotation.Value;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import blog.syua.healthcheck.HealthCheckRequest;
-import blog.syua.healthcheck.HealthCheckResponse;
+import blog.syua.healthcheck.dto.HealthCheckRequest;
+import blog.syua.healthcheck.dto.HealthCheckResponse;
 import blog.syua.utils.NodeMessageUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,7 +27,7 @@ public class TcpNode extends Node {
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
-	public TcpNode(String ipAddr, int port) throws IOException {
+	public TcpNode(InetAddress ipAddr, int port) throws IOException {
 		super(ipAddr, port);
 	}
 

@@ -36,7 +36,7 @@ class TcpNodeGroupTest {
 		@DisplayName("등록된 UDP 노드로 포워딩을 수행한다")
 		void forwardToRegisteredUdpNode() throws IOException, InterruptedException {
 			//given
-			TcpNode mockedUdpNode = new TcpNode(InetAddress.getLocalHost().getHostAddress(), TEST_PORT) {
+			TcpNode mockedUdpNode = new TcpNode(InetAddress.getLocalHost(), TEST_PORT) {
 				@Override
 				public void forwardPacket(Socket clientSocket) {
 					try {
@@ -67,7 +67,7 @@ class TcpNodeGroupTest {
 		@DisplayName("TCP 노드가 존재하지 않을 경우 포워딩를 시작할 수 없다")
 		void cannotStartForward() throws IOException {
 			//given
-			TcpNode tcpNode = new TcpNode(InetAddress.getLocalHost().getHostAddress(), TEST_PORT);
+			TcpNode tcpNode = new TcpNode(InetAddress.getLocalHost(), TEST_PORT);
 			tcpNodeManager.registerNode(tcpNode);
 
 			//when
@@ -83,7 +83,7 @@ class TcpNodeGroupTest {
 		@DisplayName("TCP 노드가 존재하지 않는 경우 더이상 새로운 요청을 처리하지 않는다")
 		void doNotProcessNewRequest() throws InterruptedException, IOException {
 			//given
-			TcpNode tcpNode = new TcpNode(InetAddress.getLocalHost().getHostAddress(), TEST_PORT);
+			TcpNode tcpNode = new TcpNode(InetAddress.getLocalHost(), TEST_PORT);
 			tcpNodeManager.registerNode(tcpNode);
 			tcpNodeManager.startForwarding();
 			Thread.sleep(1000);
