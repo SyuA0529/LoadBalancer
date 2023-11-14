@@ -1,4 +1,4 @@
-package blog.syua.forward;
+package blog.syua.node.groupmanager;
 
 import static org.assertj.core.api.Assertions.*;
 
