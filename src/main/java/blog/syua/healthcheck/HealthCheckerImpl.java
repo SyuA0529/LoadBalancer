@@ -81,7 +81,7 @@ public class HealthCheckerImpl implements HealthChecker {
 
 	private void unRegisterUnHealthyNode(Node node) {
 		try {
-			nodeGroupManager.unRegisterNode(node.getProtocol(), node.getIpAddr().getHostAddress(), node.getPort());
+			nodeGroupManager.unRegisterNode(node.getProtocol(), node.getIpAddr(), node.getPort());
 		} catch (IOException exception) {
 			log.error("HealthCheckerImpl: Error occur in UnRegister Node\n{}",
 				Arrays.toString(exception.getStackTrace()));
