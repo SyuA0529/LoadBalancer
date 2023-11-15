@@ -24,7 +24,7 @@ public abstract class Node {
 		if (protocol.equals(Protocol.UDP)) {
 			return new UdpNode(ipAddr, port);
 		}
-		throw new IllegalArgumentException("Node를 생성할 수 없습니다");
+		throw new IllegalArgumentException("Cannot create Node");
 	}
 
 	public abstract Protocol getProtocol();

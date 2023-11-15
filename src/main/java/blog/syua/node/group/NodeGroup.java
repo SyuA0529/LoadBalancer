@@ -17,7 +17,7 @@ public interface NodeGroup {
 		throw new IllegalArgumentException("Unable to create Node Manager");
 	}
 
-	void startForwarding() throws IOException;
+	void startForwarding();
 
 	void registerNode(Node tcpNode);
 

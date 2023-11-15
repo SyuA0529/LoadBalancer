@@ -47,13 +47,13 @@ public class NodeGroupManagerImpl implements NodeGroupManager {
 	}
 
 	@Override
-	public void unRegisterNode(Protocol protocol, InetAddress ipAddr, int port) throws IOException {
+	public void unRegisterNode(Protocol protocol, InetAddress ipAddr, int port) {
 		ForwardInfo forwardInfo = ForwardInfo.of(protocol, port);
 		NodeGroup nodeGroup = findNodeGroup(forwardInfo);
 		if (Objects.isNull(nodeGroup)) {
 			log.info("Attempted to delete a node that does not exist: - {} {} {}",
 				protocol.toString(), ipAddr, port);
-			throw new IllegalArgumentException("존재하지 않는 노드입니다");
+			throw new IllegalArgumentException("Node that does not exist");
 		}
 		log.info("Unregister Node - {} {} {}", protocol, ipAddr, port);
 		Node node = Node.newInstance(protocol, ipAddr, port);
