@@ -9,6 +9,6 @@ public interface NodeGroupManager extends NodeManagingCallback {
 
 	void registerNode(Protocol protocol, InetAddress ipAddr, int port) throws IOException;
 
-	void unRegisterNode(Protocol protocol, InetAddress ipAddr, int port) throws IOException;
+	void unRegisterNode(Protocol protocol, InetAddress ipAddr, int port);
 
 }

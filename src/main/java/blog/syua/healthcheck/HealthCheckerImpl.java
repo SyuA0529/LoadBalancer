@@ -1,6 +1,5 @@
 package blog.syua.healthcheck;
 
-import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -88,7 +87,7 @@ public class HealthCheckerImpl implements HealthChecker {
 	private void unRegisterUnHealthyNode(Node node) {
 		try {
 			nodeGroupManager.unRegisterNode(node.getProtocol(), node.getIpAddr(), node.getPort());
-		} catch (IOException exception) {
+		} catch (Exception exception) {
 			log.error("Error occur in UnRegister Node");
 			exception.printStackTrace();
 		}

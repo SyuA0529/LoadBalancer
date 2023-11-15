@@ -69,7 +69,7 @@ class UnRegisterControlRequestHandlerTest {
 		void returnControlFailResponse() throws IOException {
 			//given
 			ControlRequest controlRequest = new ControlRequest(ControlType.UNREGISTER, Protocol.TCP, 0);
-			doThrow(new IOException()).when(mockedNodeGroupManager).unRegisterNode(same(Protocol.TCP), any(InetAddress.class), anyInt());
+			doThrow(new IllegalArgumentException()).when(mockedNodeGroupManager).unRegisterNode(same(Protocol.TCP), any(InetAddress.class), anyInt());
 
 			//when
 			ControlResponse response = unRegisterControlRequestHandler.handleRequest(controlRequest,

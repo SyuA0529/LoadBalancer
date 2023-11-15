@@ -17,11 +17,9 @@ import org.junit.jupiter.api.Test;
 
 import blog.syua.node.group.ForwardInfo;
 import blog.syua.node.group.NodeGroup;
-import blog.syua.node.node.Protocol;
-import blog.syua.node.groupmanager.NodeGroupManager;
-import blog.syua.node.groupmanager.NodeGroupManagerImpl;
 import blog.syua.node.group.TcpNodeGroup;
 import blog.syua.node.group.UdpNodeGroup;
+import blog.syua.node.node.Protocol;
 import blog.syua.node.node.TcpNode;
 import blog.syua.node.node.UdpNode;
 
@@ -125,7 +123,7 @@ class NodeGroupManagerImplTest {
 			Assertions.assertThatThrownBy(() ->
 					nodeGroupManager.unRegisterNode(Protocol.TCP, InetAddress.getLocalHost(), 3))
 				.isInstanceOf(IllegalArgumentException.class)
-				.hasMessage("존재하지 않는 노드입니다");
+				.hasMessage("Node that does not exist");
 		}
 	}
 

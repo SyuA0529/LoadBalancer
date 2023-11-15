@@ -1,6 +1,5 @@
 package blog.syua.control.requesthandler;
 
-import java.io.IOException;
 import java.net.InetAddress;
 
 import blog.syua.control.ControlType;
@@ -16,6 +15,6 @@ public abstract class ControlRequestHandler {
 
 	public abstract ControlType getHandleType();
 
-	public abstract ControlResponse handleRequest(ControlRequest controlRequest, InetAddress ipAddr) throws IOException;
+	public abstract ControlResponse handleRequest(ControlRequest controlRequest, InetAddress ipAddr);
 
 }
