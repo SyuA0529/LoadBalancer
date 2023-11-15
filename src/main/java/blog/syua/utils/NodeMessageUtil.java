@@ -8,7 +8,7 @@ public class NodeMessageUtil {
 
 	private static final String TCP_SOCKET_INTERRUPT_MESSAGE = "Interrupted function call: accept failed";
 	private static final String UDP_SOCKET_INTERRUPT_MESSAGE = "socket closed";
-	private static final String FORWARD_ERROR_MESSAGE = "패킷 포워딩에 실패하였습니다";
+	private static final String FORWARD_ERROR_MESSAGE = "Packet forwarding failed";
 
 	private NodeMessageUtil() {
 	}

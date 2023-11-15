@@ -14,7 +14,7 @@ public interface NodeGroup {
 		if (protocol.equals(Protocol.UDP)) {
 			return new UdpNodeGroup(port);
 		}
-		throw new IllegalArgumentException("NodeManager를 생성할 수 없습니다");
+		throw new IllegalArgumentException("Unable to create Node Manager");
 	}
 
 	void startForwarding() throws IOException;

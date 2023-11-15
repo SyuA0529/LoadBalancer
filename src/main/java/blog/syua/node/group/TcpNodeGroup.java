@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Queue;
@@ -41,18 +40,18 @@ public class TcpNodeGroup implements NodeGroup {
 	@Override
 	public void startForwarding() {
 		if (tcpNodes.isEmpty()) {
-			throw new IllegalStateException("포워딩을 시작할 수 없습니다");
+			throw new IllegalStateException("Unable to start forwarding");
 		}
 		if (isAvailable) {
-			throw new IllegalStateException("이미 포워딩이 진행중입니다");
+			throw new IllegalStateException("Forwarding is already in progress");
 		}
 		isAvailable = true;
 		new Thread(() -> {
-			log.info("TcpNodeGroup: StartForward - {}", this);
+			log.info("StartForward - {}", this);
 			Socket clientSocket;
 			try {
 				while (isAvailable && Objects.nonNull(clientSocket = listenSocket.accept())) {
-					log.info("TcpNodeGroup: Connect new client - {} {}", clientSocket.getInetAddress(),
+					log.info("Connect new client - {} {}", clientSocket.getInetAddress(),
 						clientSocket.getPort());
 					Socket finalClientSocket = clientSocket;
 					threadPool.execute(() -> selectNode().forwardPacket(finalClientSocket));
@@ -60,7 +59,6 @@ public class TcpNodeGroup implements NodeGroup {
 			} catch (Exception exception) {
 				checkSocketException(exception);
 			}
-
 		}).start();
 
 	}
@@ -68,19 +66,19 @@ public class TcpNodeGroup implements NodeGroup {
 	@Override
 	public synchronized void registerNode(Node tcpNode) {
 		if (!(tcpNode instanceof TcpNode)) {
-			throw new IllegalArgumentException("TCP 노드가 아닙니다");
+			throw new IllegalArgumentException("Not a TCP node");
 		}
 		tcpNodes.offer((TcpNode)tcpNode);
-		log.info("TcpNodeGroup: RegisterNode - {}", tcpNode);
+		log.info("RegisterNode - {}", tcpNode);
 	}
 
 	@Override
 	public synchronized void unRegisterNode(Node tcpNode) {
 		if (!(tcpNode instanceof TcpNode)) {
-			throw new IllegalArgumentException("TCP 노드가 아닙니다");
+			throw new IllegalArgumentException("Not a TCP node");
 		}
 		tcpNodes.remove(tcpNode);
-		log.info("TcpNodeGroup: UnregisterNode - {}", tcpNode);
+		log.info("UnRegisterNode - {}", tcpNode);
 		if (tcpNodes.isEmpty()) {
 			isAvailable = false;
 			ThreadPoolUtils.removeThreadPool(threadPool, listenSocket);
@@ -95,17 +93,25 @@ public class TcpNodeGroup implements NodeGroup {
 	private void checkSocketException(Exception exception) {
 		if (exception instanceof SocketException &&
 			exception.getMessage().equals(NodeMessageUtil.getSocketInterruptMessage(Protocol.TCP))) {
-			log.info("TcpNodeGroup: Stop Forward - {}", this);
-			return;
+			log.info("Stop Forward - {}", this);
 		}
-		log.error("TcpNodeGroup: Error occur in startForward\n{}", Arrays.toString(exception.getStackTrace()));
-		throw new IllegalThreadStateException("패킷을 받을 수 없습니다 " + exception.getMessage());
+		log.error("Unable to forward packets");
+		exception.printStackTrace();
+		Thread.currentThread().interrupt();
 	}
 
 	private synchronized TcpNode selectNode() {
 		TcpNode curNode = tcpNodes.poll();
 		tcpNodes.offer(curNode);
 		return curNode;
+	}
+
+	@Override
+	public String toString() {
+		return "TcpNodeGroup{" +
+			"protocol=" + Protocol.TCP +
+			", port=" + listenSocket.getLocalPort() +
+			'}';
 	}
 
 }

@@ -45,7 +45,7 @@ class HealthCheckerImplTest {
 	class MethodOnRegisterNode {
 
 		@Test
-		@DisplayName("일정 주기마다 노드를 헬스체크 작업을 수행한다")
+		@DisplayName("일정 주기마다 노드의 헬스체크 작업을 수행한다")
 		void startHealthCheck() throws IOException, InterruptedException {
 			//given
 
@@ -99,7 +99,7 @@ class HealthCheckerImplTest {
 		}
 
 		@Test
-		@DisplayName("이미 등록된 노드를 재등록하면 IllegalArgumentException 예외를 발생시킨다")
+		@DisplayName("이미 등록된 노드를 재등록하면 로그에 Node already exists를 작성한다")
 		void throwIllegalArgumentException() throws IOException {
 			//given
 			TcpNode mockedTcpNode = getMockedTcpNode(() -> {
@@ -112,7 +112,7 @@ class HealthCheckerImplTest {
 			//then
 			assertThatThrownBy(() -> healthChecker.onRegisterNode(mockedTcpNode))
 				.isInstanceOf(IllegalArgumentException.class)
-				.hasMessage("이미 존재하는 노드입니다");
+				.hasMessage("Node already exists");
 		}
 	}
 

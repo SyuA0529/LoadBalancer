@@ -76,7 +76,7 @@ class TcpNodeGroupTest {
 			//then
 			assertThatThrownBy(() -> tcpNodeManager.startForwarding())
 				.isInstanceOf(IllegalStateException.class)
-				.hasMessage("포워딩을 시작할 수 없습니다");
+				.hasMessage("Unable to start forwarding");
 		}
 
 		@Test

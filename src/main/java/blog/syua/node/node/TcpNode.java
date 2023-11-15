@@ -6,7 +6,7 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.Arrays;
+import java.net.SocketTimeoutException;
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -27,7 +27,7 @@ public class TcpNode extends Node {
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
-	public TcpNode(InetAddress ipAddr, int port) throws IOException {
+	public TcpNode(InetAddress ipAddr, int port) {
 		super(ipAddr, port);
 	}
 
@@ -41,8 +41,8 @@ public class TcpNode extends Node {
 		try {
 			return getHealthCheckResult();
 		} catch (Exception exception) {
-			log.error("TcpNode: Error occur in Health Check\n{}",
-				Arrays.toString(exception.getStackTrace()));
+			log.error("Error occur in Health Check");
+			exception.printStackTrace();
 		}
 		return false;
 	}
@@ -54,8 +54,11 @@ public class TcpNode extends Node {
 			clientOutputStream.write(resultData);
 			clientOutputStream.flush();
 			clientSocket.close();
-		} catch (Exception e) {
-			log.info("TcpNode: Fail to forward packet\n{}", Arrays.toString(e.getStackTrace()));
+		} catch (SocketTimeoutException exception) {
+			log.info("Receive time out - Node Info: {} {} {}", getProtocol(), getIpAddr(), getPort());
+		} catch (Exception exception) {
+			log.info("Fail to forward packet");
+			exception.printStackTrace();
 			sendErrorMessage(clientSocket);
 		}
 	}
@@ -68,7 +71,7 @@ public class TcpNode extends Node {
 				return true;
 			}
 		} catch (JsonParseException jsonParseException) {
-			log.info("TcpNode: Json Parsing Error in Health Check - Node Info: {} {} {}",
+			log.info("Json Parsing Error in Health Check - Node Info: {} {} {}",
 				getProtocol(), getIpAddr(), getPort());
 		}
 		return false;
@@ -96,7 +99,8 @@ public class TcpNode extends Node {
 			outputStream.flush();
 			clientSocket.close();
 		} catch (IOException exception) {
-			log.error("TcpNode: Error Occur in sendErrorMessage\n{}", Arrays.toString(exception.getStackTrace()));
+			log.error("Error Occur in sendErrorMessage");
+			exception.printStackTrace();
 		}
 	}
 

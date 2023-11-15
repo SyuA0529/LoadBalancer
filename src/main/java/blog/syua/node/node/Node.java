@@ -18,7 +18,7 @@ public abstract class Node {
 		this.port = port;
 	}
 
-	public static Node newInstance(Protocol protocol, InetAddress ipAddr, int port) throws IOException {
+	public static Node newInstance(Protocol protocol, InetAddress ipAddr, int port) {
 		if (protocol.equals(Protocol.TCP)) {
 			return new TcpNode(ipAddr, port);
 		}
@@ -31,5 +31,13 @@ public abstract class Node {
 	public abstract Protocol getProtocol();
 
 	public abstract boolean isHealthy();
+
+	@Override
+	public String toString() {
+		return "Node{" +
+			"ipAddr=" + ipAddr +
+			", port=" + port +
+			'}';
+	}
 
 }

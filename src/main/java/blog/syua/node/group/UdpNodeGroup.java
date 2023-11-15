@@ -4,7 +4,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.ExecutorService;
@@ -43,10 +42,10 @@ public class UdpNodeGroup implements NodeGroup {
 	@Override
 	public void startForwarding() {
 		if (udpNodes.isEmpty()) {
-			throw new IllegalStateException("포워딩을 시작할 수 없습니다");
+			throw new IllegalStateException("Unable to start forwarding");
 		}
 		if (isAvailable) {
-			throw new IllegalStateException("이미 포워딩이 진행중입니다");
+			throw new IllegalStateException("Forwarding is already in progress");
 		}
 		isAvailable = true;
 		new Thread(() -> {
@@ -60,7 +59,7 @@ public class UdpNodeGroup implements NodeGroup {
 					threadPool.execute(() -> selectNode().forwardPacket(listenSocket, forwardClientPacket));
 				}
 			} catch (SocketTimeoutException timeoutException) {
-				log.info("UdpNodeGroup: Socket Time Out - {Ip: {}, Port: {}}", clientPacket.getAddress(),
+				log.info("Socket Time Out - {Ip: {}, Port: {}}", clientPacket.getAddress(),
 					clientPacket.getPort());
 			} catch (Exception exception) {
 				checkSocketException(exception);
@@ -71,23 +70,23 @@ public class UdpNodeGroup implements NodeGroup {
 	@Override
 	public synchronized void registerNode(Node udpNode) {
 		if (!(udpNode instanceof UdpNode)) {
-			throw new IllegalArgumentException("UDP 노드가 아닙니다");
+			throw new IllegalArgumentException("Not UDP node");
 		}
 		udpNodes.offer((UdpNode)udpNode);
-		log.info("UdpNodeGroup: registerNode - {}", udpNode);
+		log.info("RegisterNode - {}", udpNode);
 	}
 
 	@Override
 	public void unRegisterNode(Node udpNode) {
 		if (!(udpNode instanceof UdpNode)) {
-			throw new IllegalArgumentException("UDP 노드가 아닙니다");
+			throw new IllegalArgumentException("Not UDP node");
 		}
 		udpNodes.remove(udpNode);
 		if (udpNodes.isEmpty()) {
 			isAvailable = false;
 			ThreadPoolUtils.removeThreadPool(threadPool, listenSocket);
 		}
-		log.info("UdpNodeGroup: unregisterNode - {}", udpNode);
+		log.info("UnRegisterNode - {}", udpNode);
 	}
 
 	@Override
@@ -98,17 +97,25 @@ public class UdpNodeGroup implements NodeGroup {
 	private void checkSocketException(Exception exception) {
 		if (exception instanceof SocketException &&
 			exception.getMessage().equals(NodeMessageUtil.getSocketInterruptMessage(Protocol.UDP))) {
-			log.info("UdpNodeGroup: Stop Forward - {}", this);
-			return;
+			log.info("Stop Forward - {}", this);
 		}
-		log.error("UdpNodeGroup: Error occur in startForward\n{}", Arrays.toString(exception.getStackTrace()));
-		throw new IllegalThreadStateException("패킷을 받을 수 없습니다" + exception.getMessage());
+		log.error("Unable to forward packets");
+		exception.printStackTrace();
+		Thread.currentThread().interrupt();
 	}
 
 	private synchronized UdpNode selectNode() {
 		UdpNode curNode = udpNodes.poll();
 		udpNodes.offer(curNode);
 		return curNode;
+	}
+
+	@Override
+	public String toString() {
+		return "UdpNodeGroup{" +
+			"protocol=" + Protocol.UDP +
+			", port=" + listenSocket.getLocalPort() +
+			'}';
 	}
 
 }

@@ -1,7 +1,6 @@
 package blog.syua.healthcheck;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -42,7 +41,8 @@ public class HealthCheckerImpl implements HealthChecker {
 	@Override
 	public void onRegisterNode(Node node) {
 		if (Objects.nonNull(scheduledFutures.get(node))) {
-			throw new IllegalArgumentException("이미 존재하는 노드입니다");
+			log.info("Already undergoing health check - {}", node);
+			throw new IllegalArgumentException("Node already exists");
 		}
 		ScheduledFuture<?> scheduledFuture = scheduledThreadPool.scheduleWithFixedDelay(() -> checkNodeHealthy(node),
 			healthCheckDelay, healthCheckDelay, TimeUnit.MILLISECONDS);
@@ -52,16 +52,22 @@ public class HealthCheckerImpl implements HealthChecker {
 	@Override
 	public void onUnRegisterNode(Node node) {
 		if (scheduledFutures.containsKey(node)) {
+			log.info("Remove Task of Node-{} Health Check", node);
 			removeScheduledHealthCheckTask(node);
 		}
 	}
 
 	private void checkNodeHealthy(Node node) {
-		log.info("HealthChecker: Start Task of Node-{} Health Check", node);
-		if (!node.isHealthy()) {
-			log.info("HealthChecker: Remove Task of Node-{} Health Check", node);
-			removeScheduledHealthCheckTask(node);
-			unRegisterUnHealthyNode(node);
+		log.info("Start Task of Node-{} Health Check", node);
+		try {
+			if (!node.isHealthy()) {
+				log.info("Remove Task of Node-{} Health Check", node);
+				removeScheduledHealthCheckTask(node);
+				unRegisterUnHealthyNode(node);
+			}
+		} catch (Exception exception) {
+			log.error("Error occur in checkNodeHealthy - {}", node);
+			exception.printStackTrace();
 		}
 	}
 
@@ -74,7 +80,7 @@ public class HealthCheckerImpl implements HealthChecker {
 	private ScheduledFuture<?> getScheduledHealthCheckTask(Node node) {
 		ScheduledFuture<?> scheduledFuture = scheduledFutures.get(node);
 		if (Objects.isNull(scheduledFuture)) {
-			throw new IllegalStateException("헬스 체크 대상인 노드의 작업을 찾을 수 없습니다");
+			throw new IllegalStateException("No task found for the node to be health checked");
 		}
 		return scheduledFuture;
 	}
@@ -83,8 +89,8 @@ public class HealthCheckerImpl implements HealthChecker {
 		try {
 			nodeGroupManager.unRegisterNode(node.getProtocol(), node.getIpAddr(), node.getPort());
 		} catch (IOException exception) {
-			log.error("HealthCheckerImpl: Error occur in UnRegister Node\n{}",
-				Arrays.toString(exception.getStackTrace()));
+			log.error("Error occur in UnRegister Node");
+			exception.printStackTrace();
 		}
 	}
 

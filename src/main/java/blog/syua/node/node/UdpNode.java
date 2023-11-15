@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketTimeoutException;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -25,7 +26,7 @@ public class UdpNode extends Node {
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
-	public UdpNode(InetAddress ipAddr, int port) throws IOException {
+	public UdpNode(InetAddress ipAddr, int port) {
 		super(ipAddr, port);
 	}
 
@@ -43,9 +44,13 @@ public class UdpNode extends Node {
 			DatagramPacket resultPacket = receiveData(nodeSocket);
 			sendData(loadBalancerSocket, clientPacket.getAddress(), clientPacket.getPort(),
 				removeTrailingZeros(resultPacket.getData()));
+		} catch (SocketTimeoutException timeoutException) {
+			log.info("Socket Time Out - {Ip: {}, Port: {}}", clientPacket.getAddress(),
+				clientPacket.getPort());
+			sendErrorMessage(loadBalancerSocket, clientPacket);
 		} catch (Exception exception) {
-			log.info(Arrays.toString(exception.getStackTrace()));
-			sendErrorMessage(loadBalancerSocket);
+			exception.printStackTrace();
+			sendErrorMessage(loadBalancerSocket, clientPacket);
 		}
 	}
 
@@ -55,8 +60,8 @@ public class UdpNode extends Node {
 			socket.setSoTimeout(timeout);
 			return getHealthCheckResponse(socket);
 		} catch (Exception exception) {
-			log.error("UdpNode: Error occur in Health Check\n{}",
-				Arrays.toString(exception.getStackTrace()));
+			log.error("Error occur in Health Check");
+			exception.printStackTrace();
 		}
 		return false;
 	}
@@ -72,8 +77,10 @@ public class UdpNode extends Node {
 				return true;
 			}
 		} catch (JsonParseException jsonParseException) {
-			log.info("TcpNode: Json Parsing Error in Health Check - Node Info: {} {} {}",
+			log.info("Json Parsing Error in Health Check - Node Info: {} {} {}",
 				getProtocol(), getIpAddr(), getPort());
+		} catch (SocketTimeoutException exception) {
+			log.info("Receive time out - Node Info: {} {} {}", getProtocol(), getIpAddr(), getPort());
 		}
 		return false;
 	}
@@ -90,13 +97,15 @@ public class UdpNode extends Node {
 		socket.send(packet);
 	}
 
-	private void sendErrorMessage(DatagramSocket loadBalancerSocket) {
+	private void sendErrorMessage(DatagramSocket loadBalancerSocket, DatagramPacket clientPacket) {
 		try {
 			byte[] errorMessage = NodeMessageUtil.getForwardErrorMessage();
-			DatagramPacket errorPacket = new DatagramPacket(errorMessage, errorMessage.length);
+			DatagramPacket errorPacket = new DatagramPacket(errorMessage, errorMessage.length,
+				clientPacket.getAddress(), clientPacket.getPort());
 			loadBalancerSocket.send(errorPacket);
 		} catch (IOException exception) {
-			log.error("TcpNode: Error Occur in sendErrorMessage\n{}", Arrays.toString(exception.getStackTrace()));
+			log.error("Error Occur in sendErrorMessage");
+			exception.printStackTrace();
 		}
 	}
 

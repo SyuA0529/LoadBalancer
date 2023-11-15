@@ -37,7 +37,7 @@ public class NodeGroupManagerImpl implements NodeGroupManager {
 			nodeGroup = NodeGroup.newInstance(protocol, port);
 			nodeGroups.put(forwardInfo, nodeGroup);
 		}
-		log.info("NodeGroupManager: registerNode - {} {} {}", protocol.toString(), ipAddr, port);
+		log.info("registerNode - {} {} {}", protocol.toString(), ipAddr, port);
 		Node node = Node.newInstance(protocol, ipAddr, port);
 		nodeGroup.registerNode(node);
 		if (isNewGroup) {
@@ -51,11 +51,11 @@ public class NodeGroupManagerImpl implements NodeGroupManager {
 		ForwardInfo forwardInfo = ForwardInfo.of(protocol, port);
 		NodeGroup nodeGroup = findNodeGroup(forwardInfo);
 		if (Objects.isNull(nodeGroup)) {
-			log.info("NodeGroupManager: Attempted to delete a node that does not exist: - {} {} {}",
+			log.info("Attempted to delete a node that does not exist: - {} {} {}",
 				protocol.toString(), ipAddr, port);
 			throw new IllegalArgumentException("존재하지 않는 노드입니다");
 		}
-		log.info("NodeGroupManager: Unregister Node - {} {} {}", protocol, ipAddr, port);
+		log.info("Unregister Node - {} {} {}", protocol, ipAddr, port);
 		Node node = Node.newInstance(protocol, ipAddr, port);
 		nodeGroup.unRegisterNode(node);
 		if (nodeGroup.isEmpty()) {
@@ -66,7 +66,7 @@ public class NodeGroupManagerImpl implements NodeGroupManager {
 
 	private void unRegisterNodeGroup(Protocol protocol, int port, ForwardInfo forwardInfo) {
 		nodeGroups.remove(forwardInfo);
-		log.info("NodeGroupManager: Unregister NodeGroup - {} {}", protocol, port);
+		log.info("Unregister NodeGroup - {} {}", protocol, port);
 	}
 
 	private NodeGroup findNodeGroup(ForwardInfo forwardInfo) {

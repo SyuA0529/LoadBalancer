@@ -45,7 +45,6 @@ class UdpNodeTest {
 						new byte[nodeServerSocket.getReceiveBufferSize()], nodeServerSocket.getReceiveBufferSize());
 					nodeServerSocket.receive(packet);
 					byte[] returnData = "Hello".getBytes(StandardCharsets.UTF_8);
-					System.out.println("Hello");
 					nodeServerSocket.send(
 						new DatagramPacket(returnData, returnData.length, packet.getAddress(), packet.getPort()));
 				} catch (Exception e) {
@@ -58,7 +57,7 @@ class UdpNodeTest {
 	}
 
 	@BeforeEach
-	void beforeEach() throws IOException {
+	void beforeEach() {
 		softAssertions = new SoftAssertions();
 		udpNode = new UdpNode(InetAddress.getLoopbackAddress(), TEST_PORT);
 	}
