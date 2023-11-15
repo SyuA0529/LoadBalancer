@@ -1,14 +1,18 @@
 package blog.syua.control.dto;
 
-import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
 @Getter
 @ToString
-@AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 public class ControlSuccessResponse extends ControlResponse {
 
-	private String ack;
+	public static final String SUCCESS_ACK = "successful";
+
+	public ControlSuccessResponse() {
+		super(SUCCESS_ACK);
+	}
 
 }

@@ -1,19 +1,25 @@
 package blog.syua.control.dto;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
 @Getter
 @ToString
+@EqualsAndHashCode(callSuper = true)
 public class ControlFailResponse extends ControlResponse {
 
-	private static final String FAIL_ACK = "failed";
+	public static final String FAIL_ACK = "failed";
 
+	private final String msg;
 
-	private String ack = FAIL_ACK;
-	private String msg;
+	public ControlFailResponse() {
+		super(FAIL_ACK);
+		msg = "Fail";
+	}
 
 	public ControlFailResponse(String msg) {
+		super(FAIL_ACK);
 		this.msg = msg;
 	}
 
