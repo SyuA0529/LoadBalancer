@@ -40,7 +40,7 @@ public class TcpNode extends Node {
 	public boolean isHealthy() {
 		try {
 			return getHealthCheckResult();
-		} catch (IOException exception) {
+		} catch (Exception exception) {
 			log.error("TcpNode: Error occur in Health Check\n{}",
 				Arrays.toString(exception.getStackTrace()));
 		}
@@ -54,7 +54,7 @@ public class TcpNode extends Node {
 			clientOutputStream.write(resultData);
 			clientOutputStream.flush();
 			clientSocket.close();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			log.info("TcpNode: Fail to forward packet\n{}", Arrays.toString(e.getStackTrace()));
 			sendErrorMessage(clientSocket);
 		}

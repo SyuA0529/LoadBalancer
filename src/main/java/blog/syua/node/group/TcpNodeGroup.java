@@ -57,7 +57,7 @@ public class TcpNodeGroup implements NodeGroup {
 					Socket finalClientSocket = clientSocket;
 					threadPool.execute(() -> selectNode().forwardPacket(finalClientSocket));
 				}
-			} catch (IOException exception) {
+			} catch (Exception exception) {
 				checkSocketException(exception);
 			}
 
@@ -92,7 +92,7 @@ public class TcpNodeGroup implements NodeGroup {
 		return tcpNodes.isEmpty();
 	}
 
-	private void checkSocketException(IOException exception) {
+	private void checkSocketException(Exception exception) {
 		if (exception instanceof SocketException &&
 			exception.getMessage().equals(NodeMessageUtil.getSocketInterruptMessage(Protocol.TCP))) {
 			log.info("TcpNodeGroup: Stop Forward - {}", this);

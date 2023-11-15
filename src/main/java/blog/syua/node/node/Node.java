@@ -2,7 +2,6 @@ package blog.syua.node.node;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

@@ -1,6 +1,5 @@
 package blog.syua.node.group;
 
-import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
@@ -63,7 +62,7 @@ public class UdpNodeGroup implements NodeGroup {
 			} catch (SocketTimeoutException timeoutException) {
 				log.info("UdpNodeGroup: Socket Time Out - {Ip: {}, Port: {}}", clientPacket.getAddress(),
 					clientPacket.getPort());
-			} catch (IOException exception) {
+			} catch (Exception exception) {
 				checkSocketException(exception);
 			}
 		}).start();
@@ -96,7 +95,7 @@ public class UdpNodeGroup implements NodeGroup {
 		return udpNodes.isEmpty();
 	}
 
-	private void checkSocketException(IOException exception) {
+	private void checkSocketException(Exception exception) {
 		if (exception instanceof SocketException &&
 			exception.getMessage().equals(NodeMessageUtil.getSocketInterruptMessage(Protocol.UDP))) {
 			log.info("UdpNodeGroup: Stop Forward - {}", this);

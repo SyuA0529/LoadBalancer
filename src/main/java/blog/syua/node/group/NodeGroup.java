@@ -2,8 +2,8 @@ package blog.syua.node.group;
 
 import java.io.IOException;
 
-import blog.syua.node.node.Protocol;
 import blog.syua.node.node.Node;
+import blog.syua.node.node.Protocol;
 
 public interface NodeGroup {
 

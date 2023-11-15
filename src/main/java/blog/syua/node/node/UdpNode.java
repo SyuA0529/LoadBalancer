@@ -43,7 +43,7 @@ public class UdpNode extends Node {
 			DatagramPacket resultPacket = receiveData(nodeSocket);
 			sendData(loadBalancerSocket, clientPacket.getAddress(), clientPacket.getPort(),
 				removeTrailingZeros(resultPacket.getData()));
-		} catch (IOException exception) {
+		} catch (Exception exception) {
 			log.info(Arrays.toString(exception.getStackTrace()));
 			sendErrorMessage(loadBalancerSocket);
 		}
@@ -54,7 +54,7 @@ public class UdpNode extends Node {
 		try (DatagramSocket socket = new DatagramSocket()) {
 			socket.setSoTimeout(timeout);
 			return getHealthCheckResponse(socket);
-		} catch (IOException exception) {
+		} catch (Exception exception) {
 			log.error("UdpNode: Error occur in Health Check\n{}",
 				Arrays.toString(exception.getStackTrace()));
 		}
