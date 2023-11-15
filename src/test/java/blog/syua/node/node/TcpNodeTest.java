@@ -21,7 +21,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -37,10 +36,7 @@ class TcpNodeTest {
 
 	private static ServerSocket nodeSocket;
 	private static boolean testing;
-
 	private SoftAssertions softAssertions;
-
-	@Mock
 	private Socket clientSocket;
 	private final byte[] clientSocketData = new byte[MAX_DATA_SIZE];
 	private final ByteArrayOutputStream clientSocketOutputStream = new ByteArrayOutputStream(MAX_DATA_SIZE);
