@@ -20,7 +20,7 @@ import blog.syua.node.node.TcpNode;
 @DisplayName("TCP NodeGroup 테스트")
 class TcpNodeGroupTest {
 
-	private static final int TEST_PORT = 10002;
+	private static final int TEST_PORT = 20020;
 
 	private TcpNodeGroup tcpNodeManager;
 
@@ -33,7 +33,7 @@ class TcpNodeGroupTest {
 	@DisplayName("Method: startForward")
 	class MethodStartForward {
 		@Test
-		@DisplayName("등록된 UDP 노드로 포워딩을 수행한다")
+		@DisplayName("등록된 ㅆ쳬 노드로 포워딩을 수행한다")
 		void forwardToRegisteredUdpNode() throws IOException, InterruptedException {
 			//given
 			TcpNode mockedUdpNode = new TcpNode(InetAddress.getLocalHost(), TEST_PORT) {
@@ -67,7 +67,7 @@ class TcpNodeGroupTest {
 		@DisplayName("TCP 노드가 존재하지 않을 경우 포워딩를 시작할 수 없다")
 		void cannotStartForward() throws IOException {
 			//given
-			TcpNode tcpNode = new TcpNode(InetAddress.getLocalHost(), TEST_PORT);
+			TcpNode tcpNode = new TcpNode(InetAddress.getLocalHost(), TEST_PORT + 1);
 			tcpNodeManager.registerNode(tcpNode);
 
 			//when

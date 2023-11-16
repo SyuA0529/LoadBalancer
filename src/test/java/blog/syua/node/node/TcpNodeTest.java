@@ -32,7 +32,7 @@ import nl.altindag.log.LogCaptor;
 class TcpNodeTest {
 
 	private static final int MAX_DATA_SIZE = 8192;
-	private static final int TEST_PORT = 10000;
+	private static final int TEST_PORT = 40010;
 
 	private static ServerSocket nodeSocket;
 	private static boolean testing;
@@ -105,7 +105,7 @@ class TcpNodeTest {
 		@DisplayName("노드에게 받은 데이터를 포워딩할 수 없는 경우 에러 메세지를 반환한다")
 		void returnErrorMessage() throws IOException {
 			//given
-			TcpNode deadTcpNode = new TcpNode(InetAddress.getLocalHost(), 0);
+			TcpNode deadTcpNode = new TcpNode(InetAddress.getLocalHost(), TEST_PORT - 1);
 
 			//when
 			deadTcpNode.forwardPacket(clientSocket);
@@ -123,8 +123,8 @@ class TcpNodeTest {
 		@DisplayName("노드가 살아있는 경우 true를 반환한다")
 		void returnTrue() throws IOException {
 			//given
-			TcpNode targetTcpNode = new TcpNode(InetAddress.getLocalHost(), 20000);
-			Thread nodeThread = getHealthCheckNodeThread(20000, true);
+			TcpNode targetTcpNode = new TcpNode(InetAddress.getLocalHost(), TEST_PORT + 1);
+			Thread nodeThread = getHealthCheckNodeThread(TEST_PORT + 1, true);
 			nodeThread.start();
 
 			//when
@@ -137,7 +137,7 @@ class TcpNodeTest {
 		@DisplayName("노드가 죽어있는 경우 false를 반환한다")
 		void returnFalseWhenNodeDead() throws IOException {
 			//given
-			TcpNode targetTcpNode = new TcpNode(InetAddress.getLocalHost(), 20000);
+			TcpNode targetTcpNode = new TcpNode(InetAddress.getLocalHost(), TEST_PORT + 2);
 
 			//when
 			//then
@@ -148,8 +148,8 @@ class TcpNodeTest {
 		@DisplayName("노드가 보낸 응답의 파싱에 실패한 경우 false를 반환한다")
 		void returnFalseWhenParsingFail() throws IOException {
 			//given
-			TcpNode targetTcpNode = new TcpNode(InetAddress.getLocalHost(), 20001);
-			Thread nodeThread = getHealthCheckNodeThread(20001, false);
+			TcpNode targetTcpNode = new TcpNode(InetAddress.getLocalHost(), TEST_PORT + 3);
+			Thread nodeThread = getHealthCheckNodeThread(TEST_PORT + 3, false);
 			nodeThread.start();
 			LogCaptor logCaptor = LogCaptor.forClass(TcpNode.class);
 

@@ -26,7 +26,7 @@ import nl.altindag.log.LogCaptor;
 @DisplayName("UDP 노드 테스트")
 class UdpNodeTest {
 
-	private static final int TEST_PORT = 10001;
+	private static final int TEST_PORT = 40020;
 	private static DatagramSocket nodeServerSocket;
 	private static boolean testing;
 
@@ -97,14 +97,14 @@ class UdpNodeTest {
 		@DisplayName("노드에게 받은 데이터를 포워딩할 수 없는 경우 에러 메세지를 반환한다")
 		void returnErrorMessage() throws IOException {
 			//given
-			UdpNode deadUdpNode = new UdpNode(InetAddress.getLocalHost(), 30000);
+			UdpNode deadUdpNode = new UdpNode(InetAddress.getLocalHost(), TEST_PORT - 1);
 			byte[] clientData = "client data".getBytes(StandardCharsets.UTF_8);
 			DatagramPacket clientPacket = new DatagramPacket(clientData, clientData.length,
-				InetAddress.getLoopbackAddress(), TEST_PORT);
+				InetAddress.getLoopbackAddress(), TEST_PORT - 1);
 			final DatagramPacket[] resultPacket = new DatagramPacket[1];
 
 			//when
-			deadUdpNode.forwardPacket(new DatagramSocket(6001) {
+			deadUdpNode.forwardPacket(new DatagramSocket(TEST_PORT - 2) {
 				@Override
 				public void send(DatagramPacket packet) {
 					resultPacket[0] = packet;
@@ -124,8 +124,8 @@ class UdpNodeTest {
 		@DisplayName("노드가 살아있는 경우 true를 반환한다")
 		void returnTrue() throws IOException {
 			//given
-			UdpNode targetUdpNode = new UdpNode(InetAddress.getLocalHost(), 20002);
-			Thread nodeThread = getHealthCheckNodeThread(20002, true);
+			UdpNode targetUdpNode = new UdpNode(InetAddress.getLocalHost(), TEST_PORT + 1);
+			Thread nodeThread = getHealthCheckNodeThread(TEST_PORT + 1, true);
 			nodeThread.start();
 
 			//when
@@ -137,7 +137,7 @@ class UdpNodeTest {
 		@DisplayName("노드가 죽어있는 경우 false를 반환한다")
 		void returnFalse() throws IOException {
 			//given
-			UdpNode targetUdpNode = new UdpNode(InetAddress.getLocalHost(), 0);
+			UdpNode targetUdpNode = new UdpNode(InetAddress.getLocalHost(), TEST_PORT + 2);
 
 			//when
 			//then
@@ -148,8 +148,8 @@ class UdpNodeTest {
 		@DisplayName("노드가 보낸 응답의 파싱에 실패한 경우 false를 반환한다")
 		void returnFalseWhenParsingFail() throws IOException {
 			//given
-			UdpNode targetUdpNode = new UdpNode(InetAddress.getLocalHost(), 20001);
-			Thread nodeThread = getHealthCheckNodeThread(20001, false);
+			UdpNode targetUdpNode = new UdpNode(InetAddress.getLocalHost(), TEST_PORT + 3);
+			Thread nodeThread = getHealthCheckNodeThread(TEST_PORT + 3, false);
 			nodeThread.start();
 			LogCaptor logCaptor = LogCaptor.forClass(UdpNode.class);
 
