@@ -95,9 +95,9 @@ public class ControlRequestDispatcherServer implements ControlRequestDispatcher 
 			nodeSocket.setSoTimeout(controlRequestTimeout);
 			requestHandleControlRequest(inputStream, outputStream, nodeSocket.getInetAddress());
 			nodeSocket.shutdownOutput();
-		} catch (Exception e) {
-			log.error("Error occur in Dispatcher ControlRequest\n{}",
-				Arrays.toString(e.getStackTrace()));
+		} catch (Exception exception) {
+			log.error("Error occur in Dispatcher ControlRequest");
+			exception.printStackTrace();
 		}
 	}
 
@@ -108,6 +108,7 @@ public class ControlRequestDispatcherServer implements ControlRequestDispatcher 
 		try {
 			requestData = inputStream.readAllBytes();
 			controlRequest = objectMapper.readValue(requestData, ControlRequest.class);
+			log.info("Receive Control Request - {}", controlRequest);
 			ControlResponse response = getControlRequestHandler(controlRequest.getCmd())
 				.handleRequest(controlRequest, nodeIpAddr);
 			outputStream.write(objectMapper.writeValueAsBytes(response));

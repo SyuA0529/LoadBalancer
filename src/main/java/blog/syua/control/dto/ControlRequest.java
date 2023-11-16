@@ -5,9 +5,11 @@ import blog.syua.node.node.Protocol;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Getter
 @NoArgsConstructor
+@ToString
 @AllArgsConstructor
 public class ControlRequest {
 
