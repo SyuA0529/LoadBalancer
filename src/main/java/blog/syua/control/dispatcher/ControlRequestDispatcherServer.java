@@ -64,9 +64,11 @@ public class ControlRequestDispatcherServer implements ControlRequestDispatcher 
 	}
 
 	public void startDispatcher() {
+		log.info("Start ControlRequestDispatcherServer");
 		new Thread(() -> {
 			try (ServerSocket serverSocket = new ServerSocket(controlRequestPort)) {
 				Socket nodeSocket;
+				log.info("Ready to receive Control Request");
 				while (Objects.nonNull(nodeSocket = serverSocket.accept())) {
 					Socket finalNodeSocket = nodeSocket;
 					threadPool.execute(() -> dispatcherControlRequest(finalNodeSocket));
