@@ -139,8 +139,8 @@ class UdpNodeTest {
     private Thread getForwardNodeThread() {
         return new Thread(() -> {
             try (DatagramSocket nodeServerSocket = new DatagramSocket(FORWARD_PORT)) {
-                DatagramPacket clientPacket = new DatagramPacket(new byte[nodeServerSocket.getReceiveBufferSize()],
-                        nodeServerSocket.getReceiveBufferSize());
+                DatagramPacket clientPacket = new DatagramPacket(new byte[Protocol.UDP.getMaxReceiveSize()],
+                    Protocol.UDP.getMaxReceiveSize());
                 while (true) {
                     nodeServerSocket.receive(clientPacket);
                     byte[] returnData = "Hello".getBytes(StandardCharsets.UTF_8);
@@ -158,8 +158,8 @@ class UdpNodeTest {
     private Thread getHealthCheckNodeThread(boolean isCorrect) {
         return new Thread(() -> {
             try (DatagramSocket serverSocket = new DatagramSocket(HEALTH_CHECK_PORT)) {
-                DatagramPacket clientPacket = new DatagramPacket(new byte[serverSocket.getReceiveBufferSize()],
-                        serverSocket.getReceiveBufferSize());
+                DatagramPacket clientPacket = new DatagramPacket(new byte[Protocol.UDP.getMaxReceiveSize()],
+                    Protocol.UDP.getMaxReceiveSize());
                 while (true) {
                     serverSocket.receive(clientPacket);
                     byte[] responseBytes;

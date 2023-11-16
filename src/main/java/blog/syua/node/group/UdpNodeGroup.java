@@ -52,8 +52,8 @@ public class UdpNodeGroup implements NodeGroup {
 			DatagramPacket clientPacket = null;
 			try {
 				while (isRunning) {
-					clientPacket = new DatagramPacket(new byte[listenSocket.getReceiveBufferSize()],
-						listenSocket.getReceiveBufferSize());
+					clientPacket = new DatagramPacket(new byte[Protocol.UDP.getMaxReceiveSize()],
+						Protocol.UDP.getMaxReceiveSize());
 					listenSocket.receive(clientPacket);
 					DatagramPacket forwardClientPacket = clientPacket;
 					threadPool.execute(() -> selectNode().forwardPacket(listenSocket, forwardClientPacket));

@@ -86,8 +86,8 @@ public class UdpNode extends Node {
 	}
 
 	private static DatagramPacket receiveData(DatagramSocket socket) throws IOException {
-		DatagramPacket resultPacket = new DatagramPacket(new byte[socket.getReceiveBufferSize()],
-			socket.getReceiveBufferSize());
+		DatagramPacket resultPacket = new DatagramPacket(new byte[Protocol.UDP.getMaxReceiveSize()],
+			Protocol.UDP.getMaxReceiveSize());
 		socket.receive(resultPacket);
 		return resultPacket;
 	}

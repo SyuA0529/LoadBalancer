@@ -16,6 +16,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import blog.syua.node.node.Protocol;
 import blog.syua.node.node.UdpNode;
 
 @DisplayName("UDP NodeGroup 테스트")
@@ -107,8 +108,8 @@ class UdpNodeGroupTest {
 		socket.setSoTimeout(3000);
 		socket.send(packet);
 
-		DatagramPacket resultPacket = new DatagramPacket(new byte[socket.getReceiveBufferSize()],
-			socket.getReceiveBufferSize());
+		DatagramPacket resultPacket = new DatagramPacket(new byte[Protocol.UDP.getMaxReceiveSize()],
+			Protocol.UDP.getMaxReceiveSize());
 		socket.receive(resultPacket);
 		socket.close();
 		return new String(removeTrailingZeros(resultPacket.getData()), StandardCharsets.UTF_8);
