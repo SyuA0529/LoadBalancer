@@ -124,8 +124,8 @@ class UdpNodeTest {
 		@DisplayName("노드가 살아있는 경우 true를 반환한다")
 		void returnTrue() throws IOException {
 			//given
-			UdpNode targetUdpNode = new UdpNode(InetAddress.getLocalHost(), 20000);
-			Thread nodeThread = getHealthCheckNodeThread(20000, true);
+			UdpNode targetUdpNode = new UdpNode(InetAddress.getLocalHost(), 20002);
+			Thread nodeThread = getHealthCheckNodeThread(20002, true);
 			nodeThread.start();
 
 			//when

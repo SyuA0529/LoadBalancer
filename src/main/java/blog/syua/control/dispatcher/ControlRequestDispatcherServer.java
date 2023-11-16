@@ -35,8 +35,8 @@ public class ControlRequestDispatcherServer implements ControlRequestDispatcher 
 	@Value("${loadbalancer.control.port:8080}")
 	private final int controlRequestPort = 8080;
 
-	@Value("${loadbalancer.control.timeout:3000}")
-	private final int controlRequestTimeout = 3000;
+	@Value("${loadbalancer.control.timeout:5000}")
+	private final int controlRequestTimeout = 5000;
 
 	@Value("${loadbalancer.control.thread-pool-size:4}")
 	private final int controlRequestThreadPoolSize = Runtime.getRuntime().availableProcessors();

@@ -67,6 +67,8 @@ class HealthCheckerImplTest {
 			softAssertions.assertThat(tcpHealthCheckCount).isGreaterThanOrEqualTo(2);
 			softAssertions.assertThat(udpHealthCheckCount).isGreaterThanOrEqualTo(2);
 			softAssertions.assertAll();
+			healthChecker.onUnRegisterNode(mockedTcpNode);
+			healthChecker.onUnRegisterNode(mockedUdpNode);
 		}
 
 		@Test
@@ -113,6 +115,7 @@ class HealthCheckerImplTest {
 			assertThatThrownBy(() -> healthChecker.onRegisterNode(mockedTcpNode))
 				.isInstanceOf(IllegalArgumentException.class)
 				.hasMessage("Node already exists");
+			healthChecker.onUnRegisterNode(mockedTcpNode);
 		}
 	}
 
