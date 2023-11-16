@@ -50,7 +50,7 @@ public class TcpNode extends Node {
 	public void forwardPacket(Socket clientSocket) {
 		try (InputStream clientInputStream = clientSocket.getInputStream();
 			 OutputStream clientOutputStream = clientSocket.getOutputStream()) {
-			byte[] resultData = getResultFromNode(SocketReadUtils.readTcpAllBytes(clientInputStream));
+			byte[] resultData = getResultFromNode(SocketReadUtils.readTcpAllBytes(clientInputStream), getPort());
 			clientOutputStream.write(resultData);
 			clientOutputStream.flush();
 			clientSocket.close();
@@ -64,7 +64,7 @@ public class TcpNode extends Node {
 	}
 
 	private boolean getHealthCheckResult() throws IOException {
-		byte[] resultFromNode = getResultFromNode(objectMapper.writeValueAsBytes(HealthCheckRequest.getInstance()));
+		byte[] resultFromNode = getResultFromNode(objectMapper.writeValueAsBytes(HealthCheckRequest.getInstance()), getHealthCheckPort());
 		try {
 			HealthCheckResponse response = objectMapper.readValue(resultFromNode, HealthCheckResponse.class);
 			if (response.getAck().equals(HealthCheckResponse.SUCCESS_ACK)) {
@@ -77,8 +77,8 @@ public class TcpNode extends Node {
 		return false;
 	}
 
-	private byte[] getResultFromNode(byte[] forwardData) throws IOException {
-		try (Socket nodeSocket = new Socket(getIpAddr(), getPort())) {
+	private byte[] getResultFromNode(byte[] forwardData, int port) throws IOException {
+		try (Socket nodeSocket = new Socket(getIpAddr(), port)) {
 			nodeSocket.setSoTimeout(tcpTimeOut);
 			byte[] resultData;
 			try (InputStream nodeInputStream = nodeSocket.getInputStream();

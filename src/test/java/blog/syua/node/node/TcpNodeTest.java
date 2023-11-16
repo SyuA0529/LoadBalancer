@@ -8,6 +8,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -100,9 +101,10 @@ class TcpNodeTest {
 
         @Test
         @DisplayName("노드가 살아있는 경우 true를 반환한다")
-        void returnTrue() throws IOException, InterruptedException {
+        void returnTrue() throws IOException, InterruptedException, NoSuchFieldException, IllegalAccessException {
             //given
             TcpNode targetTcpNode = new TcpNode(InetAddress.getLocalHost(), HEALTH_CHECK_PORT);
+            setHealthCheckPort(targetTcpNode);
             Thread nodeThread = getHealthCheckNodeThread(true);
             nodeThread.start();
             Thread.sleep(1000);
@@ -115,9 +117,10 @@ class TcpNodeTest {
 
         @Test
         @DisplayName("노드가 죽어있는 경우 false를 반환한다")
-        void returnFalseWhenNodeDead() throws IOException {
+        void returnFalseWhenNodeDead() throws IOException, NoSuchFieldException, IllegalAccessException {
             //given
             TcpNode targetTcpNode = new TcpNode(InetAddress.getLocalHost(), HEALTH_CHECK_PORT);
+            setHealthCheckPort(targetTcpNode);
 
             //when
             //then
@@ -126,9 +129,14 @@ class TcpNodeTest {
 
         @Test
         @DisplayName("노드가 보낸 응답의 파싱에 실패한 경우 false를 반환한다")
-        void returnFalseWhenParsingFail() throws IOException, InterruptedException {
+        void returnFalseWhenParsingFail() throws
+            IOException,
+            InterruptedException,
+            NoSuchFieldException,
+            IllegalAccessException {
             //given
             TcpNode targetTcpNode = new TcpNode(InetAddress.getLocalHost(), HEALTH_CHECK_PORT);
+            setHealthCheckPort(targetTcpNode);
             Thread nodeThread = getHealthCheckNodeThread(false);
             nodeThread.start();
             LogCaptor logCaptor = LogCaptor.forClass(TcpNode.class);
@@ -141,6 +149,12 @@ class TcpNodeTest {
             softAssertions.assertAll();
             logCaptor.close();
             nodeThread.interrupt();
+        }
+
+        private void setHealthCheckPort(TcpNode targetTcpNode) throws NoSuchFieldException, IllegalAccessException {
+            Field field = targetTcpNode.getClass().getSuperclass().getDeclaredField("healthCheckPort");
+            field.setAccessible(true);
+            field.set(targetTcpNode, HEALTH_CHECK_PORT);
         }
     }
 

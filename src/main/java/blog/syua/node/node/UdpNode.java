@@ -69,7 +69,7 @@ public class UdpNode extends Node {
 	private boolean getHealthCheckResponse(DatagramSocket socket) throws IOException {
 		try {
 			byte[] requestMessage = objectMapper.writeValueAsBytes(HealthCheckRequest.getInstance());
-			sendData(socket, getIpAddr(), getPort(), requestMessage);
+			sendData(socket, getIpAddr(), getHealthCheckPort(), requestMessage);
 			DatagramPacket responsePacket = SocketReadUtils.readUdpAllBytes(socket);
 			HealthCheckResponse response = objectMapper.readValue(
 				NodeMessageUtil.removeTrailingZeros(responsePacket.getData()),

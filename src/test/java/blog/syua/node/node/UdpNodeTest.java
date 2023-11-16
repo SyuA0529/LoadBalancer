@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -93,9 +94,10 @@ class UdpNodeTest {
     class MethodIsHealthy {
         @Test
         @DisplayName("노드가 살아있는 경우 true를 반환한다")
-        void returnTrue() throws IOException, InterruptedException {
+        void returnTrue() throws IOException, InterruptedException, NoSuchFieldException, IllegalAccessException {
             //given
-            UdpNode targetUdpNode = new UdpNode(InetAddress.getLocalHost(), FORWARD_PORT);
+            UdpNode targetUdpNode = new UdpNode(InetAddress.getLocalHost(), HEALTH_CHECK_PORT);
+            setHealthCheckPort(targetUdpNode);
             Thread nodeThread = getHealthCheckNodeThread(true);
             nodeThread.start();
             Thread.sleep(1000);
@@ -107,9 +109,10 @@ class UdpNodeTest {
 
         @Test
         @DisplayName("노드가 죽어있는 경우 false를 반환한다")
-        void returnFalse() throws IOException {
+        void returnFalse() throws IOException, NoSuchFieldException, IllegalAccessException {
             //given
-            UdpNode targetUdpNode = new UdpNode(InetAddress.getLocalHost(), FORWARD_PORT);
+            UdpNode targetUdpNode = new UdpNode(InetAddress.getLocalHost(), HEALTH_CHECK_PORT);
+            setHealthCheckPort(targetUdpNode);
 
             //when
             //then
@@ -118,9 +121,14 @@ class UdpNodeTest {
 
         @Test
         @DisplayName("노드가 보낸 응답의 파싱에 실패한 경우 false를 반환한다")
-        void returnFalseWhenParsingFail() throws IOException, InterruptedException {
+        void returnFalseWhenParsingFail() throws
+            IOException,
+            InterruptedException,
+            NoSuchFieldException,
+            IllegalAccessException {
             //given
-            UdpNode targetUdpNode = new UdpNode(InetAddress.getLocalHost(), FORWARD_PORT);
+            UdpNode targetUdpNode = new UdpNode(InetAddress.getLocalHost(), HEALTH_CHECK_PORT);
+            setHealthCheckPort(targetUdpNode);
             Thread nodeThread = getHealthCheckNodeThread(false);
             nodeThread.start();
             LogCaptor logCaptor = LogCaptor.forClass(UdpNode.class);
@@ -133,6 +141,12 @@ class UdpNodeTest {
             softAssertions.assertAll();
             logCaptor.close();
             nodeThread.interrupt();
+        }
+
+        private void setHealthCheckPort(UdpNode targetUdpNode) throws NoSuchFieldException, IllegalAccessException {
+            Field field = targetUdpNode.getClass().getSuperclass().getDeclaredField("healthCheckPort");
+            field.setAccessible(true);
+            field.set(targetUdpNode, HEALTH_CHECK_PORT);
         }
     }
 

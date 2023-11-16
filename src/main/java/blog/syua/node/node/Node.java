@@ -2,6 +2,8 @@ package blog.syua.node.node;
 
 import java.net.InetAddress;
 
+import org.springframework.beans.factory.annotation.Value;
+
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
@@ -9,12 +11,16 @@ import lombok.Getter;
 @EqualsAndHashCode
 public abstract class Node {
 
+	@Value("${loadbalancer.healthcheck.port}")
+	private final int healthCheckPort;
+
 	private final InetAddress ipAddr;
 	private final int port;
 
 	protected Node(InetAddress ipAddr, int port) {
 		this.ipAddr = ipAddr;
 		this.port = port;
+		healthCheckPort = 5555;
 	}
 
 	public static Node newInstance(Protocol protocol, InetAddress ipAddr, int port) {
