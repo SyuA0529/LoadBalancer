@@ -21,7 +21,7 @@ public class NodeMessageUtil {
 		if (protocol.equals(Protocol.UDP)) {
 			return UDP_SOCKET_INTERRUPT_MESSAGE;
 		}
-		return null;
+		return List.of();
 	}
 
 	public static byte[] getForwardErrorMessage() {
