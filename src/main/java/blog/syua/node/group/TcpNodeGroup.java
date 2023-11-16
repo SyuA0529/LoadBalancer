@@ -25,9 +25,6 @@ public class TcpNodeGroup implements NodeGroup {
     @Value("${loadbalancer.tcp.thread-pool-size:4}")
     private final int threadPoolSize = Runtime.getRuntime().availableProcessors();
 
-    @Value("${loadbalancer.tcp.timeout:5000}")
-    private final int tcpTimeOut = 5000;
-
     private final Queue<TcpNode> tcpNodes;
     private final ExecutorService threadPool;
     private final ServerSocket listenSocket;
@@ -36,7 +33,6 @@ public class TcpNodeGroup implements NodeGroup {
     public TcpNodeGroup(int port) throws IOException {
         tcpNodes = new LinkedList<>();
         listenSocket = new ServerSocket(port);
-        listenSocket.setSoTimeout(tcpTimeOut);
         isRunning = false;
         threadPool = Executors.newFixedThreadPool(threadPoolSize);
     }
@@ -102,6 +98,7 @@ public class TcpNodeGroup implements NodeGroup {
         }
         log.error("Unable to forward packets");
         exception.printStackTrace();
+        tcpNodes.forEach(this::unRegisterNode);
         Thread.currentThread().interrupt();
     }
 

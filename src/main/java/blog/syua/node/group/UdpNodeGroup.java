@@ -24,8 +24,6 @@ public class UdpNodeGroup implements NodeGroup {
 	@Value("${loadbalancer.tcp.thread-pool-size:4}")
 	private final int threadPoolSize = Runtime.getRuntime().availableProcessors();
 
-	@Value("${loadbalancer.udp.timeout:5000}")
-	public final int timeout = 5000;
 	private final Queue<UdpNode> udpNodes;
 	private final ExecutorService threadPool;
 	private final DatagramSocket listenSocket;
@@ -34,7 +32,6 @@ public class UdpNodeGroup implements NodeGroup {
 	public UdpNodeGroup(int port) throws SocketException {
 		udpNodes = new LinkedList<>();
 		listenSocket = new DatagramSocket(port);
-		listenSocket.setSoTimeout(timeout);
 		isRunning = false;
 		threadPool = Executors.newFixedThreadPool(threadPoolSize);
 	}
@@ -102,6 +99,7 @@ public class UdpNodeGroup implements NodeGroup {
 		}
 		log.error("Unable to forward packets");
 		exception.printStackTrace();
+		udpNodes.forEach(this::unRegisterNode);
 		Thread.currentThread().interrupt();
 	}
 
