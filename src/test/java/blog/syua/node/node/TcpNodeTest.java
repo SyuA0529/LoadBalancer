@@ -15,8 +15,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 import org.assertj.core.api.SoftAssertions;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -31,163 +29,170 @@ import nl.altindag.log.LogCaptor;
 @DisplayName("TCP 노드 테스트")
 class TcpNodeTest {
 
-	private static final int MAX_DATA_SIZE = 8192;
-	private static final int TEST_PORT = 40010;
+    private static final int MAX_DATA_SIZE = 8192;
+    private static int FORWARD_PORT = 40010;
+    private static int HEALTH_CHECK_PORT = 40020;
 
-	private static ServerSocket nodeSocket;
-	private static boolean testing;
-	private SoftAssertions softAssertions;
-	private Socket clientSocket;
-	private final byte[] clientSocketData = new byte[MAX_DATA_SIZE];
-	private final ByteArrayOutputStream clientSocketOutputStream = new ByteArrayOutputStream(MAX_DATA_SIZE);
-	private TcpNode tcpNode;
+    private SoftAssertions softAssertions;
+    private Socket clientSocket;
+    private final byte[] clientSocketData = new byte[MAX_DATA_SIZE];
+    private final ByteArrayOutputStream clientSocketOutputStream = new ByteArrayOutputStream(MAX_DATA_SIZE);
 
-	@BeforeAll
-	static void beforeAll() throws IOException {
-		nodeSocket = new ServerSocket(TEST_PORT);
-		testing = true;
-		new Thread(() -> {
-			while (testing) {
-				try {
-					Socket socket = nodeSocket.accept();
-					InputStream inputStream = socket.getInputStream();
-					OutputStream outputStream = socket.getOutputStream();
+    @BeforeEach
+    void beforeEach() throws IOException {
+        softAssertions = new SoftAssertions();
+        clientSocket = mock(Socket.class);
+        when(clientSocket.getInputStream()).thenReturn(new ByteArrayInputStream(clientSocketData));
+        when(clientSocket.getOutputStream()).thenReturn(clientSocketOutputStream);
+        when(clientSocket.getInetAddress()).thenReturn(InetAddress.getLoopbackAddress());
+        when(clientSocket.getPort()).thenReturn(5001);
+    }
 
-					inputStream.readAllBytes();
-					outputStream.write("Hello".getBytes(StandardCharsets.UTF_8));
-					outputStream.flush();
+    @Nested
+    @DisplayName("Method: forwardPacket")
+    class MethodForwardPacket {
+        @BeforeEach
+        void setUp() {
+            FORWARD_PORT += 1;
+        }
 
-					outputStream.close();
-					inputStream.close();
-					socket.close();
-				} catch (IOException exception) {
-					if (!exception.getMessage().equals("Interrupted function call: accept failed")) {
-						throw new RuntimeException(exception);
-					}
-				}
-			}
-		}).start();
-	}
+        @Test
+        @DisplayName("노드에게 받은 데이터를 포워딩한다")
+        void forwardDataToNode() throws InterruptedException {
+            //given
+            Thread forwardNodeThread = getForwardNodeThread();
+            forwardNodeThread.start();
+            TcpNode forwardTcpNode = new TcpNode(InetAddress.getLoopbackAddress(), FORWARD_PORT);
+            Thread.sleep(1000);
 
-	@BeforeEach
-	void beforeEach() throws IOException {
-		softAssertions = new SoftAssertions();
-		tcpNode = new TcpNode(InetAddress.getLoopbackAddress(), TEST_PORT);
-		clientSocket = mock(Socket.class);
-		when(clientSocket.getInputStream()).thenReturn(new ByteArrayInputStream(clientSocketData));
-		when(clientSocket.getOutputStream()).thenReturn(clientSocketOutputStream);
-		when(clientSocket.getInetAddress()).thenReturn(InetAddress.getLoopbackAddress());
-		when(clientSocket.getPort()).thenReturn(5001);
-	}
+            //when
+            forwardTcpNode.forwardPacket(clientSocket);
 
-	@AfterAll
-	static void afterAll() throws IOException {
-		testing = false;
-		nodeSocket.close();
-	}
+            //then
+            String result = clientSocketOutputStream.toString(StandardCharsets.UTF_8);
+            assertThat(result).isEqualTo("Hello");
+            forwardNodeThread.interrupt();
+        }
 
-	@Nested
-	@DisplayName("Method: forwardPacket")
-	class MethodForwardPacket {
-		@Test
-		@DisplayName("노드에게 받은 데이터를 포워딩한다")
-		void forwardDataToNode() {
-			//given
-			//when
-			tcpNode.forwardPacket(clientSocket);
+        @Test
+        @DisplayName("노드에게 받은 데이터를 포워딩할 수 없는 경우 에러 메세지를 반환한다")
+        void returnErrorMessage() throws IOException {
+            //given
+            TcpNode deadTcpNode = new TcpNode(InetAddress.getLocalHost(), FORWARD_PORT);
 
-			//then
-			String result = clientSocketOutputStream.toString(StandardCharsets.UTF_8);
-			assertThat(result).isEqualTo("Hello");
-		}
+            //when
+            deadTcpNode.forwardPacket(clientSocket);
 
-		@Test
-		@DisplayName("노드에게 받은 데이터를 포워딩할 수 없는 경우 에러 메세지를 반환한다")
-		void returnErrorMessage() throws IOException {
-			//given
-			TcpNode deadTcpNode = new TcpNode(InetAddress.getLocalHost(), TEST_PORT - 1);
+            //then
+            byte[] result = clientSocketOutputStream.toByteArray();
+            assertThat(result).containsExactly(NodeMessageUtil.getForwardErrorMessage());
+        }
+    }
 
-			//when
-			deadTcpNode.forwardPacket(clientSocket);
+    @Nested
+    @DisplayName("Method: isHealthy")
+    class MethodIsHealthy {
+        @BeforeEach
+        void setUp() {
+            HEALTH_CHECK_PORT += 1;
+        }
 
-			//then
-			byte[] result = clientSocketOutputStream.toByteArray();
-			assertThat(result).containsExactly(NodeMessageUtil.getForwardErrorMessage());
-		}
-	}
+        @Test
+        @DisplayName("노드가 살아있는 경우 true를 반환한다")
+        void returnTrue() throws IOException, InterruptedException {
+            //given
+            TcpNode targetTcpNode = new TcpNode(InetAddress.getLocalHost(), HEALTH_CHECK_PORT);
+            Thread nodeThread = getHealthCheckNodeThread(true);
+            nodeThread.start();
+            Thread.sleep(1000);
 
-	@Nested
-	@DisplayName("Method: isHealthy")
-	class MethodIsHealthy {
-		@Test
-		@DisplayName("노드가 살아있는 경우 true를 반환한다")
-		void returnTrue() throws IOException {
-			//given
-			TcpNode targetTcpNode = new TcpNode(InetAddress.getLocalHost(), TEST_PORT + 1);
-			Thread nodeThread = getHealthCheckNodeThread(TEST_PORT + 1, true);
-			nodeThread.start();
+            //when
+            //then
+            assertThat(targetTcpNode.isHealthy()).isTrue();
+            nodeThread.interrupt();
+        }
 
-			//when
-			//then
-			assertThat(targetTcpNode.isHealthy()).isTrue();
-			nodeThread.interrupt();
-		}
+        @Test
+        @DisplayName("노드가 죽어있는 경우 false를 반환한다")
+        void returnFalseWhenNodeDead() throws IOException {
+            //given
+            TcpNode targetTcpNode = new TcpNode(InetAddress.getLocalHost(), HEALTH_CHECK_PORT);
 
-		@Test
-		@DisplayName("노드가 죽어있는 경우 false를 반환한다")
-		void returnFalseWhenNodeDead() throws IOException {
-			//given
-			TcpNode targetTcpNode = new TcpNode(InetAddress.getLocalHost(), TEST_PORT + 2);
+            //when
+            //then
+            assertThat(targetTcpNode.isHealthy()).isFalse();
+        }
 
-			//when
-			//then
-			assertThat(targetTcpNode.isHealthy()).isFalse();
-		}
+        @Test
+        @DisplayName("노드가 보낸 응답의 파싱에 실패한 경우 false를 반환한다")
+        void returnFalseWhenParsingFail() throws IOException, InterruptedException {
+            //given
+            TcpNode targetTcpNode = new TcpNode(InetAddress.getLocalHost(), HEALTH_CHECK_PORT);
+            Thread nodeThread = getHealthCheckNodeThread(false);
+            nodeThread.start();
+            LogCaptor logCaptor = LogCaptor.forClass(TcpNode.class);
+            Thread.sleep(1000);
 
-		@Test
-		@DisplayName("노드가 보낸 응답의 파싱에 실패한 경우 false를 반환한다")
-		void returnFalseWhenParsingFail() throws IOException {
-			//given
-			TcpNode targetTcpNode = new TcpNode(InetAddress.getLocalHost(), TEST_PORT + 3);
-			Thread nodeThread = getHealthCheckNodeThread(TEST_PORT + 3, false);
-			nodeThread.start();
-			LogCaptor logCaptor = LogCaptor.forClass(TcpNode.class);
+            //when
+            //then
+            softAssertions.assertThat(targetTcpNode.isHealthy()).isFalse();
+            softAssertions.assertThat(logCaptor.getLogs()).anyMatch(log -> log.contains("Json Parsing Error"));
+            softAssertions.assertAll();
+            logCaptor.close();
+            nodeThread.interrupt();
+        }
+    }
 
-			//when
-			//then
-			softAssertions.assertThat(targetTcpNode.isHealthy()).isFalse();
-			softAssertions.assertThat(logCaptor.getLogs()).anyMatch(log -> log.contains("Json Parsing Error"));
-			softAssertions.assertAll();
-			logCaptor.close();
-			nodeThread.interrupt();
-		}
+    private Thread getForwardNodeThread() {
+        return new Thread(() -> {
+            try {
+                ServerSocket nodeSocket = new ServerSocket(FORWARD_PORT);
+                Socket clientSocket;
+                while (Objects.nonNull(clientSocket = nodeSocket.accept())) {
+                    InputStream inputStream = clientSocket.getInputStream();
+                    OutputStream outputStream = clientSocket.getOutputStream();
 
-		private Thread getHealthCheckNodeThread(int port, boolean isCorrect) {
-			return new Thread(() -> {
-				try {
-					ServerSocket serverSocket = new ServerSocket(port);
-					Socket clientSocket;
-					while (Objects.nonNull(clientSocket = serverSocket.accept())) {
-						InputStream inputStream = clientSocket.getInputStream();
-						// inputStream.readAllBytes();
-						OutputStream outputStream = clientSocket.getOutputStream();
-						if (isCorrect) {
-							HealthCheckResponse response = new HealthCheckResponse();
-							response.setHealthy();
-							outputStream.write(new ObjectMapper().writeValueAsBytes(response));
-						} else {
-							outputStream.write("Wrong".getBytes(StandardCharsets.UTF_8));
-						}
-						outputStream.flush();
-						inputStream.close();
-						outputStream.close();
-						clientSocket.close();
-					}
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
-			});
-		}
-	}
+                    inputStream.readAllBytes();
+                    outputStream.write("Hello".getBytes(StandardCharsets.UTF_8));
+                    outputStream.flush();
+
+                    outputStream.close();
+                    inputStream.close();
+                    clientSocket.close();
+                }
+            } catch (IOException exception) {
+                if (!exception.getMessage().equals("Interrupted function call: accept failed")) {
+                    throw new RuntimeException(exception);
+                }
+            }
+        });
+    }
+
+    private Thread getHealthCheckNodeThread(boolean isCorrect) {
+        return new Thread(() -> {
+            try {
+                ServerSocket serverSocket = new ServerSocket(HEALTH_CHECK_PORT);
+                Socket clientSocket;
+                while (Objects.nonNull(clientSocket = serverSocket.accept())) {
+                    InputStream inputStream = clientSocket.getInputStream();
+                    inputStream.readAllBytes();
+                    OutputStream outputStream = clientSocket.getOutputStream();
+                    if (isCorrect) {
+                        HealthCheckResponse response = new HealthCheckResponse();
+                        response.setHealthy();
+                        outputStream.write(new ObjectMapper().writeValueAsBytes(response));
+                    } else {
+                        outputStream.write("Wrong".getBytes(StandardCharsets.UTF_8));
+                    }
+                    outputStream.flush();
+                    inputStream.close();
+                    outputStream.close();
+                    clientSocket.close();
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
 
 }

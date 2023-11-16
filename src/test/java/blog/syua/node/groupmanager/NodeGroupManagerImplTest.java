@@ -43,8 +43,8 @@ class NodeGroupManagerImplTest {
 		@DisplayName("새로운 유형의 포워딩 정보일 경우 새로 노드를 생성하고, 새로 생성한 노드 그룹에 이를 저장한다")
 		void RegisterNodeToNewNodeGroup() throws IOException, ReflectiveOperationException {
 			//given
-			TcpNode tcpNode = new TcpNode(InetAddress.getLocalHost(), 0);
-			UdpNode udpNode = new UdpNode(InetAddress.getLocalHost(), 0);
+			TcpNode tcpNode = new TcpNode(InetAddress.getLocalHost(), 40000);
+			UdpNode udpNode = new UdpNode(InetAddress.getLocalHost(), 40000);
 
 			//when
 			nodeGroupManager.registerNode(Protocol.TCP, tcpNode.getIpAddr(), tcpNode.getPort());
@@ -65,11 +65,11 @@ class NodeGroupManagerImplTest {
 		@DisplayName("기존 유형의 포워딩 정보인 경우 새로 노드를 생성하고, 해당하는 기존 노드 그룹에 이를 저장한다")
 		void registerNodeToExistingNodeGroup() throws IOException, ReflectiveOperationException {
 			//given
-			nodeGroupManager.registerNode(Protocol.TCP, InetAddress.getLocalHost(), 0);
-			nodeGroupManager.registerNode(Protocol.UDP, InetAddress.getLocalHost(), 0);
+			nodeGroupManager.registerNode(Protocol.TCP, InetAddress.getLocalHost(), 40010);
+			nodeGroupManager.registerNode(Protocol.UDP, InetAddress.getLocalHost(), 40010);
 
-			TcpNode tcpNode = new TcpNode(InetAddress.getLocalHost(), 0);
-			UdpNode udpNode = new UdpNode(InetAddress.getLocalHost(), 1);
+			TcpNode tcpNode = new TcpNode(InetAddress.getLocalHost(), 40010);
+			UdpNode udpNode = new UdpNode(InetAddress.getLocalHost(), 40011);
 
 			//when
 			nodeGroupManager.registerNode(tcpNode.getProtocol(), tcpNode.getIpAddr(), tcpNode.getPort());
@@ -99,8 +99,8 @@ class NodeGroupManagerImplTest {
 		@DisplayName("존재하는 노드인 경우 노드 그룹에서 이를 삭제한다")
 		void removeNodeFromNodeGroup() throws IOException, ReflectiveOperationException {
 			//given
-			TcpNode tcpNode = new TcpNode(InetAddress.getLocalHost(), 0);
-			UdpNode udpNode = new UdpNode(InetAddress.getLocalHost(), 0);
+			TcpNode tcpNode = new TcpNode(InetAddress.getLocalHost(), 40020);
+			UdpNode udpNode = new UdpNode(InetAddress.getLocalHost(), 40020);
 			nodeGroupManager.registerNode(Protocol.TCP, tcpNode.getIpAddr(), tcpNode.getPort());
 			nodeGroupManager.registerNode(Protocol.UDP, udpNode.getIpAddr(), udpNode.getPort());
 
@@ -121,7 +121,7 @@ class NodeGroupManagerImplTest {
 			//when
 			//then
 			Assertions.assertThatThrownBy(() ->
-					nodeGroupManager.unRegisterNode(Protocol.TCP, InetAddress.getLocalHost(), 3))
+					nodeGroupManager.unRegisterNode(Protocol.TCP, InetAddress.getLocalHost(), 40030))
 				.isInstanceOf(IllegalArgumentException.class)
 				.hasMessage("Node that does not exist");
 		}

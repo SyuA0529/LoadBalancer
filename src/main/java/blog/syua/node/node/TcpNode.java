@@ -78,15 +78,14 @@ public class TcpNode extends Node {
 	}
 
 	private byte[] getResultFromNode(byte[] forwardData) throws IOException {
-		try (Socket nodeSocket = new Socket()) {
+		try (Socket nodeSocket = new Socket(getIpAddr(), getPort())) {
 			nodeSocket.setSoTimeout(tcpTimeOut);
-			nodeSocket.connect(new InetSocketAddress(getIpAddr(), getPort()));
 			byte[] resultData;
 			try (InputStream nodeInputStream = nodeSocket.getInputStream();
 				 OutputStream nodeOutputStream = nodeSocket.getOutputStream()) {
 				nodeOutputStream.write(forwardData);
 				nodeOutputStream.flush();
-				nodeSocket.shutdownOutput(); // have to study
+				nodeSocket.shutdownOutput();
 				resultData = nodeInputStream.readAllBytes();
 			}
 			return resultData;

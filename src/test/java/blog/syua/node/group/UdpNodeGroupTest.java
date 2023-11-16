@@ -21,12 +21,13 @@ import blog.syua.node.node.UdpNode;
 @DisplayName("UDP NodeGroup 테스트")
 class UdpNodeGroupTest {
 
-	private static final int TEST_PORT = 20030;
+	private static int TEST_PORT = 20030;
 
 	private UdpNodeGroup udpNodeManager;
 
 	@BeforeEach
 	void beforeEach() throws SocketException {
+		TEST_PORT += 1;
 		udpNodeManager = new UdpNodeGroup(TEST_PORT);
 	}
 
@@ -68,7 +69,7 @@ class UdpNodeGroupTest {
 		@DisplayName("UDP 노드가 존재하지 않을 경우 포워딩을 시작할 수 없다")
 		void cannotStartForwarding() throws IOException {
 			//given
-			UdpNode udpNode = new UdpNode(InetAddress.getLocalHost(), TEST_PORT + 1);
+			UdpNode udpNode = new UdpNode(InetAddress.getLocalHost(), TEST_PORT);
 			udpNodeManager.registerNode(udpNode);
 
 			//when
