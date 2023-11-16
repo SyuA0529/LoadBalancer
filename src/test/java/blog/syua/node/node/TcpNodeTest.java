@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import blog.syua.healthcheck.dto.HealthCheckResponse;
 import blog.syua.utils.NodeMessageUtil;
+import blog.syua.utils.SocketReadUtils;
 import nl.altindag.log.LogCaptor;
 
 @DisplayName("TCP 노드 테스트")
@@ -35,7 +36,7 @@ class TcpNodeTest {
 
     private SoftAssertions softAssertions;
     private Socket clientSocket;
-    private final byte[] clientSocketData = new byte[MAX_DATA_SIZE];
+    private final byte[] clientSocketData = "Client Data".getBytes(StandardCharsets.UTF_8);
     private final ByteArrayOutputStream clientSocketOutputStream = new ByteArrayOutputStream(MAX_DATA_SIZE);
 
     @BeforeEach
@@ -152,7 +153,7 @@ class TcpNodeTest {
                     InputStream inputStream = clientSocket.getInputStream();
                     OutputStream outputStream = clientSocket.getOutputStream();
 
-                    inputStream.readAllBytes();
+                    SocketReadUtils.readTcpAllBytes(inputStream);
                     outputStream.write("Hello".getBytes(StandardCharsets.UTF_8));
                     outputStream.flush();
 
@@ -175,7 +176,7 @@ class TcpNodeTest {
                 Socket clientSocket;
                 while (Objects.nonNull(clientSocket = serverSocket.accept())) {
                     InputStream inputStream = clientSocket.getInputStream();
-                    inputStream.readAllBytes();
+                    SocketReadUtils.readTcpAllBytes(inputStream);
                     OutputStream outputStream = clientSocket.getOutputStream();
                     if (isCorrect) {
                         HealthCheckResponse response = new HealthCheckResponse();

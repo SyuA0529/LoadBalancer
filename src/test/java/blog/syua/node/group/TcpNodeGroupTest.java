@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import blog.syua.node.node.TcpNode;
+import blog.syua.utils.SocketReadUtils;
 
 @DisplayName("TCP NodeGroup 테스트")
 class TcpNodeGroupTest {
@@ -106,7 +107,7 @@ class TcpNodeGroupTest {
 		outputStream.write("Client Data".getBytes(StandardCharsets.UTF_8));
 		outputStream.flush();
 		InputStream inputStream = clientSocket.getInputStream();
-		String result = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+		String result = new String(SocketReadUtils.readTcpAllBytes(inputStream), StandardCharsets.UTF_8);
 		outputStream.close();
 		inputStream.close();
 		clientSocket.close();

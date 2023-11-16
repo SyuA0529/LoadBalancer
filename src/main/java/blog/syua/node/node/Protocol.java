@@ -5,7 +5,7 @@ import lombok.Getter;
 @Getter
 public enum Protocol {
 
-	TCP(Integer.MAX_VALUE),
+	TCP(0xFFFF),
 	UDP(0xFFFF);
 
 	private final int maxReceiveSize;

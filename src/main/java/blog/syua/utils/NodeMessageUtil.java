@@ -1,6 +1,7 @@
 package blog.syua.utils;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 
 import blog.syua.node.node.Protocol;
@@ -26,6 +27,14 @@ public class NodeMessageUtil {
 
 	public static byte[] getForwardErrorMessage() {
 		return FORWARD_ERROR_MESSAGE.getBytes(StandardCharsets.UTF_8);
+	}
+
+	public static byte[] removeTrailingZeros(byte[] data) {
+		int endIndex = data.length - 1;
+		while (endIndex >= 0 && data[endIndex] == 0) {
+			endIndex--;
+		}
+		return Arrays.copyOf(data, endIndex + 1);
 	}
 
 }

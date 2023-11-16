@@ -5,7 +5,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketTimeoutException;
-import java.util.Arrays;
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import blog.syua.healthcheck.dto.HealthCheckRequest;
 import blog.syua.healthcheck.dto.HealthCheckResponse;
 import blog.syua.utils.NodeMessageUtil;
+import blog.syua.utils.SocketReadUtils;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -41,9 +41,9 @@ public class UdpNode extends Node {
 			nodeSocket.setSoTimeout(timeout);
 			InetAddress nodeIpAddr = getIpAddr();
 			sendData(nodeSocket, nodeIpAddr, getPort(), clientPacket.getData());
-			DatagramPacket resultPacket = receiveData(nodeSocket);
+			DatagramPacket resultPacket = SocketReadUtils.readUdpAllBytes(nodeSocket);
 			sendData(loadBalancerSocket, clientPacket.getAddress(), clientPacket.getPort(),
-				removeTrailingZeros(resultPacket.getData()));
+				NodeMessageUtil.removeTrailingZeros(resultPacket.getData()));
 		} catch (SocketTimeoutException timeoutException) {
 			log.info("Socket Time Out - {Ip: {}, Port: {}}", clientPacket.getAddress(),
 				clientPacket.getPort());
@@ -70,8 +70,9 @@ public class UdpNode extends Node {
 		try {
 			byte[] requestMessage = objectMapper.writeValueAsBytes(HealthCheckRequest.getInstance());
 			sendData(socket, getIpAddr(), getPort(), requestMessage);
-			DatagramPacket responsePacket = receiveData(socket);
-			HealthCheckResponse response = objectMapper.readValue(removeTrailingZeros(responsePacket.getData()),
+			DatagramPacket responsePacket = SocketReadUtils.readUdpAllBytes(socket);
+			HealthCheckResponse response = objectMapper.readValue(
+				NodeMessageUtil.removeTrailingZeros(responsePacket.getData()),
 				HealthCheckResponse.class);
 			if (response.getAck().equals(HealthCheckResponse.SUCCESS_ACK)) {
 				return true;
@@ -83,13 +84,6 @@ public class UdpNode extends Node {
 			log.info("Receive time out - Node Info: {} {} {}", getProtocol(), getIpAddr(), getPort());
 		}
 		return false;
-	}
-
-	private static DatagramPacket receiveData(DatagramSocket socket) throws IOException {
-		DatagramPacket resultPacket = new DatagramPacket(new byte[Protocol.UDP.getMaxReceiveSize()],
-			Protocol.UDP.getMaxReceiveSize());
-		socket.receive(resultPacket);
-		return resultPacket;
 	}
 
 	private void sendData(DatagramSocket socket, InetAddress ipAddr, int port, byte[] data) throws IOException {
@@ -107,14 +101,6 @@ public class UdpNode extends Node {
 			log.error("Error Occur in sendErrorMessage");
 			exception.printStackTrace();
 		}
-	}
-
-	private static byte[] removeTrailingZeros(byte[] data) {
-		int endIndex = data.length - 1;
-		while (endIndex >= 0 && data[endIndex] == 0) {
-			endIndex--;
-		}
-		return Arrays.copyOf(data, endIndex + 1);
 	}
 
 	@Override

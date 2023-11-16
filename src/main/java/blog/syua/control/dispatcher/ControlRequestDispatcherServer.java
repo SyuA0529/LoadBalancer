@@ -25,6 +25,7 @@ import blog.syua.control.dto.ControlFailResponse;
 import blog.syua.control.dto.ControlRequest;
 import blog.syua.control.dto.ControlResponse;
 import blog.syua.control.requesthandler.ControlRequestHandler;
+import blog.syua.utils.SocketReadUtils;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -107,7 +108,7 @@ public class ControlRequestDispatcherServer implements ControlRequestDispatcher 
 		byte[] requestData = null;
 		ControlRequest controlRequest = null;
 		try {
-			requestData = inputStream.readAllBytes();
+			requestData = SocketReadUtils.readTcpAllBytes(inputStream);
 			controlRequest = objectMapper.readValue(requestData, ControlRequest.class);
 			log.info("Receive Control Request - {}", controlRequest);
 			ControlResponse response = getControlRequestHandler(controlRequest.getCmd())

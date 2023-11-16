@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import blog.syua.healthcheck.dto.HealthCheckRequest;
 import blog.syua.healthcheck.dto.HealthCheckResponse;
 import blog.syua.utils.NodeMessageUtil;
+import blog.syua.utils.SocketReadUtils;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -49,7 +50,7 @@ public class TcpNode extends Node {
 	public void forwardPacket(Socket clientSocket) {
 		try (InputStream clientInputStream = clientSocket.getInputStream();
 			 OutputStream clientOutputStream = clientSocket.getOutputStream()) {
-			byte[] resultData = getResultFromNode(clientInputStream.readAllBytes());
+			byte[] resultData = getResultFromNode(SocketReadUtils.readTcpAllBytes(clientInputStream));
 			clientOutputStream.write(resultData);
 			clientOutputStream.flush();
 			clientSocket.close();
@@ -84,8 +85,7 @@ public class TcpNode extends Node {
 				 OutputStream nodeOutputStream = nodeSocket.getOutputStream()) {
 				nodeOutputStream.write(forwardData);
 				nodeOutputStream.flush();
-				nodeSocket.shutdownOutput();
-				resultData = nodeInputStream.readAllBytes();
+				resultData = SocketReadUtils.readTcpAllBytes(nodeInputStream);
 			}
 			return resultData;
 		}
