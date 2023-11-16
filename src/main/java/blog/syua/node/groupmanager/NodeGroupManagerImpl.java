@@ -37,7 +37,7 @@ public class NodeGroupManagerImpl implements NodeGroupManager {
 			nodeGroup = NodeGroup.newInstance(protocol, port);
 			nodeGroups.put(forwardInfo, nodeGroup);
 		}
-		log.info("registerNode - {} {} {}", protocol.toString(), ipAddr, port);
+		log.info("RegisterNode - {} {} {}", protocol.toString(), ipAddr, port);
 		Node node = Node.newInstance(protocol, ipAddr, port);
 		nodeGroup.registerNode(node);
 		if (isNewGroup) {
