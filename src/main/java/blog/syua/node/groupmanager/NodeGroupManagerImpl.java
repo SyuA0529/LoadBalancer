@@ -55,7 +55,7 @@ public class NodeGroupManagerImpl implements NodeGroupManager {
 				protocol.toString(), ipAddr, port);
 			throw new IllegalArgumentException("Node that does not exist");
 		}
-		log.info("Unregister Node - {} {} {}", protocol, ipAddr, port);
+		log.info("UnregisterNode - {} {} {}", protocol, ipAddr, port);
 		Node node = Node.newInstance(protocol, ipAddr, port);
 		nodeGroup.unRegisterNode(node);
 		if (nodeGroup.isEmpty()) {
