@@ -29,13 +29,13 @@ public class UdpNodeGroup implements NodeGroup {
 	private final Queue<UdpNode> udpNodes;
 	private final ExecutorService threadPool;
 	private final DatagramSocket listenSocket;
-	private boolean isAvailable;
+	private boolean isRunning;
 
 	public UdpNodeGroup(int port) throws SocketException {
 		udpNodes = new LinkedList<>();
 		listenSocket = new DatagramSocket(port);
 		listenSocket.setSoTimeout(timeout);
-		isAvailable = false;
+		isRunning = false;
 		threadPool = Executors.newFixedThreadPool(threadPoolSize);
 	}
 
@@ -44,14 +44,14 @@ public class UdpNodeGroup implements NodeGroup {
 		if (udpNodes.isEmpty()) {
 			throw new IllegalStateException("Unable to start forwarding");
 		}
-		if (isAvailable) {
+		if (isRunning) {
 			throw new IllegalStateException("Forwarding is already in progress");
 		}
-		isAvailable = true;
+		isRunning = true;
 		new Thread(() -> {
 			DatagramPacket clientPacket = null;
 			try {
-				while (isAvailable) {
+				while (isRunning) {
 					clientPacket = new DatagramPacket(new byte[listenSocket.getReceiveBufferSize()],
 						listenSocket.getReceiveBufferSize());
 					listenSocket.receive(clientPacket);
@@ -83,7 +83,7 @@ public class UdpNodeGroup implements NodeGroup {
 		}
 		udpNodes.remove(udpNode);
 		if (udpNodes.isEmpty()) {
-			isAvailable = false;
+			isRunning = false;
 			ThreadPoolUtils.removeThreadPool(threadPool, listenSocket);
 		}
 		log.info("UnRegisterNode - {}", udpNode);

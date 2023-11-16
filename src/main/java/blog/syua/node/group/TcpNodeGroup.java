@@ -28,12 +28,12 @@ public class TcpNodeGroup implements NodeGroup {
 	private final Queue<TcpNode> tcpNodes;
 	private final ExecutorService threadPool;
 	private final ServerSocket listenSocket;
-	private boolean isAvailable;
+	private boolean isRunning;
 
 	public TcpNodeGroup(int port) throws IOException {
 		tcpNodes = new LinkedList<>();
 		listenSocket = new ServerSocket(port);
-		isAvailable = false;
+		isRunning = false;
 		threadPool = Executors.newFixedThreadPool(threadPoolSize);
 	}
 
@@ -42,15 +42,15 @@ public class TcpNodeGroup implements NodeGroup {
 		if (tcpNodes.isEmpty()) {
 			throw new IllegalStateException("Unable to start forwarding");
 		}
-		if (isAvailable) {
+		if (isRunning) {
 			throw new IllegalStateException("Forwarding is already in progress");
 		}
-		isAvailable = true;
+		isRunning = true;
 		new Thread(() -> {
 			log.info("StartForward - {}", this);
 			Socket clientSocket;
 			try {
-				while (isAvailable && Objects.nonNull(clientSocket = listenSocket.accept())) {
+				while (isRunning && Objects.nonNull(clientSocket = listenSocket.accept())) {
 					log.info("Connect new client - {} {}", clientSocket.getInetAddress(),
 						clientSocket.getPort());
 					Socket finalClientSocket = clientSocket;
@@ -80,7 +80,7 @@ public class TcpNodeGroup implements NodeGroup {
 		tcpNodes.remove(tcpNode);
 		log.info("UnRegisterNode - {}", tcpNode);
 		if (tcpNodes.isEmpty()) {
-			isAvailable = false;
+			isRunning = false;
 			ThreadPoolUtils.removeThreadPool(threadPool, listenSocket);
 		}
 	}
