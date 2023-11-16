@@ -21,11 +21,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class UdpNodeGroup implements NodeGroup {
 
-	@Value("${loadbalancer.tcp.thread-pool-size}")
+	@Value("${loadbalancer.tcp.thread-pool-size:4}")
 	private final int threadPoolSize = Runtime.getRuntime().availableProcessors();
 
-	@Value("${loadbalancer.udp.timeout}")
-	public final int timeout = 3000;
+	@Value("${loadbalancer.udp.timeout:5000}")
+	public final int timeout = 5000;
 	private final Queue<UdpNode> udpNodes;
 	private final ExecutorService threadPool;
 	private final DatagramSocket listenSocket;

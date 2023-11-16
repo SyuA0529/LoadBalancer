@@ -32,13 +32,13 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class ControlRequestDispatcherServer implements ControlRequestDispatcher {
 
-	@Value("${loadbalancer.control.port}")
+	@Value("${loadbalancer.control.port:8080}")
 	private final int controlRequestPort = 8080;
 
-	@Value("${loadbalancer.control.timeout}")
+	@Value("${loadbalancer.control.timeout:3000}")
 	private final int controlRequestTimeout = 3000;
 
-	@Value("${loadbalancer.control.thread-pool-size}")
+	@Value("${loadbalancer.control.thread-pool-size:4}")
 	private final int controlRequestThreadPoolSize = Runtime.getRuntime().availableProcessors();
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
@@ -76,7 +76,7 @@ public class ControlRequestDispatcherServer implements ControlRequestDispatcher 
 				log.error("Error occur in Dispatcher Control Request");
 				e.printStackTrace();
 			}
-		});
+		}).start();
 	}
 
 	@Override

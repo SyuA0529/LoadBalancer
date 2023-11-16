@@ -23,10 +23,10 @@ public class HealthCheckerImpl implements HealthChecker {
 	private final ScheduledExecutorService scheduledThreadPool;
 	private final ConcurrentHashMap<Node, ScheduledFuture<?>> scheduledFutures;
 
-	@Value("${loadbalancer.healthcheck.thread-num}")
+	@Value("${loadbalancer.healthcheck.thread-num:4}")
 	private final int healthCheckThreadNum = Runtime.getRuntime().availableProcessors();
 
-	@Value("${loadbalancer.healthcheck.delay}")
+	@Value("${loadbalancer.healthcheck.delay:3000}")
 	private final int healthCheckDelay = 3000;
 
 	@Autowired

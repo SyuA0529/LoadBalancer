@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class TcpNode extends Node {
 
-	@Value("${loadbalancer.tcp.timeout}")
+	@Value("${loadbalancer.tcp.timeout:5000}")
 	private final int tcpTimeOut = 5000;
 
 	private final ObjectMapper objectMapper = new ObjectMapper();

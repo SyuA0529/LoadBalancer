@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class UdpNode extends Node {
 
-	@Value("${loadbalancer.udp.timeout}")
+	@Value("${loadbalancer.udp.timeout:5000}")
 	public final int timeout = 5000;
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
