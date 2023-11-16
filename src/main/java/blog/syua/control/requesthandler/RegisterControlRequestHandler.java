@@ -34,12 +34,14 @@ public class RegisterControlRequestHandler extends ControlRequestHandler {
 
 	@Override
 	public ControlResponse handleRequest(ControlRequest controlRequest, InetAddress ipAddr) {
+		log.info("Start Register Request - {}", ipAddr);
 		if (!controlRequest.getCmd().equals(ControlType.REGISTER)) {
 			log.info("It's not a Register request - {}", controlRequest);
 			return new ControlFailResponse(FAIL_MSG);
 		}
 		try {
 			nodeGroupManager.registerNode(controlRequest.getProtocol(), ipAddr, controlRequest.getPort());
+			log.info("Success Registeration - {} {}", ipAddr, controlRequest);
 			return new ControlSuccessResponse();
 		} catch (Exception e) {
 			log.info("Error occur in handleRequest - {}", controlRequest);

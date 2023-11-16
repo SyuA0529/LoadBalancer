@@ -34,11 +34,13 @@ public class UnRegisterControlRequestHandler extends ControlRequestHandler {
 
 	@Override
 	public ControlResponse handleRequest(ControlRequest controlRequest, InetAddress ipAddr) {
+		log.info("Start UnRegister Request - {}", ipAddr);
 		if (!controlRequest.getCmd().equals(ControlType.UNREGISTER)) {
 			log.info("It's not a UnRegister request - {}", controlRequest);
 			return new ControlFailResponse(FAIL_MSG);
 		}
 		try {
+			log.info("Success UnRegisteration - {} {}", ipAddr, controlRequest);
 			nodeGroupManager.unRegisterNode(controlRequest.getProtocol(), ipAddr, controlRequest.getPort());
 			return new ControlSuccessResponse();
 		} catch (Exception e) {
