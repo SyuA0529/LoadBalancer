@@ -96,7 +96,8 @@ public class UdpNodeGroup implements NodeGroup {
 
 	private void checkSocketException(Exception exception) {
 		if (exception instanceof SocketException &&
-			exception.getMessage().equals(NodeMessageUtil.getSocketInterruptMessage(Protocol.UDP))) {
+			NodeMessageUtil.getSocketInterruptMessage(Protocol.UDP).stream()
+					.anyMatch(message -> exception.getMessage().contains(message))) {
 			log.info("Stop Forward - {}", this);
 		}
 		log.error("Unable to forward packets");

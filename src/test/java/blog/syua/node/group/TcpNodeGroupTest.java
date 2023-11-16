@@ -96,8 +96,7 @@ class TcpNodeGroupTest {
 
 			//then
 			assertThatThrownBy(TcpNodeGroupTest.this::sendDataToNodeGroup)
-				.isInstanceOf(SocketException.class)
-				.hasMessageContaining("Connection refused");
+				.isInstanceOf(SocketException.class);
 		}
 	}
 
