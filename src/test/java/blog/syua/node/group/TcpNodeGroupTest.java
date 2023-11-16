@@ -33,7 +33,7 @@ class TcpNodeGroupTest {
 	@DisplayName("Method: startForward")
 	class MethodStartForward {
 		@Test
-		@DisplayName("등록된 ㅆ쳬 노드로 포워딩을 수행한다")
+		@DisplayName("등록된 TCP 노드로 포워딩을 수행한다")
 		void forwardToRegisteredUdpNode() throws IOException, InterruptedException {
 			//given
 			TcpNode mockedUdpNode = new TcpNode(InetAddress.getLocalHost(), TEST_PORT) {
