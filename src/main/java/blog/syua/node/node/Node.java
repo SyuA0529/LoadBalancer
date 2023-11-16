@@ -42,6 +42,7 @@ public abstract class Node {
 		return "Node{" +
 			"ipAddr=" + ipAddr +
 			", port=" + port +
+			", healthCheckPort=" + getHealthCheckPort() +
 			'}';
 	}
 
