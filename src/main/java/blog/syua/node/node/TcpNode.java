@@ -50,6 +50,8 @@ public class TcpNode extends Node {
 	public void forwardPacket(Socket clientSocket) {
 		try (InputStream clientInputStream = clientSocket.getInputStream();
 			 OutputStream clientOutputStream = clientSocket.getOutputStream()) {
+			log.info("Forward Client(ip: {}) data to Node - ({} {} {})",
+				clientSocket.getInetAddress(), getProtocol(), getIpAddr(), getPort());
 			byte[] resultData = getResultFromNode(SocketReadUtils.readTcpAllBytes(clientInputStream), getPort());
 			clientOutputStream.write(resultData);
 			clientOutputStream.flush();

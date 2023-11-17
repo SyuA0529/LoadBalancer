@@ -51,8 +51,7 @@ public class TcpNodeGroup implements NodeGroup {
             Socket clientSocket;
             try {
                 while (isRunning && Objects.nonNull(clientSocket = listenSocket.accept())) {
-                    log.info("Connect new client - {} {}", clientSocket.getInetAddress(),
-                            clientSocket.getPort());
+                    log.info("Client(ip: {}) connect to TCP Port: {}", clientSocket.getInetAddress(), listenSocket.getLocalPort());
                     Socket finalClientSocket = clientSocket;
                     threadPool.execute(() -> selectNode().forwardPacket(finalClientSocket));
                 }

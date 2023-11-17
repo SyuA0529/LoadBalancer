@@ -37,6 +37,8 @@ public class UdpNode extends Node {
 
 	public void forwardPacket(DatagramSocket loadBalancerSocket, DatagramPacket clientPacket) {
 		try {
+			log.info("Forward Client(ip: {}) data to Node - ({} {} {})",
+				clientPacket.getAddress(), getProtocol(), getIpAddr(), getPort());
 			DatagramSocket nodeSocket = new DatagramSocket();
 			nodeSocket.setSoTimeout(timeout);
 			InetAddress nodeIpAddr = getIpAddr();
@@ -45,7 +47,7 @@ public class UdpNode extends Node {
 			sendData(loadBalancerSocket, clientPacket.getAddress(), clientPacket.getPort(),
 				NodeMessageUtil.removeTrailingZeros(resultPacket.getData()));
 		} catch (SocketTimeoutException timeoutException) {
-			log.info("Socket Time Out - {Ip: {}, Port: {}}", clientPacket.getAddress(),
+			log.info("Socket Time Out - (Ip: {}, Port: {})", clientPacket.getAddress(),
 				clientPacket.getPort());
 			sendErrorMessage(loadBalancerSocket, clientPacket);
 		} catch (Exception exception) {
